@@ -22,5 +22,12 @@ public final class NumberProvider {
 	public int nextNr() {
 		return nr++;
 	}
+
+	private void reset(int newseed) {
+		this.nr = newseed;
+	}
 	
+	public void reset() {
+		reset((int) (Math.random() * 100.0));
+	}
 }
