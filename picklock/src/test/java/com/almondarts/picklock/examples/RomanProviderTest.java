@@ -34,12 +34,13 @@ public class RomanProviderTest {
 	}
 
 	/**
-	 * this test will not work since numberProvider is a Singleton with hidden/inaccessible interior
+	 * this test will not work since numberProvider is a Singleton with
+	 * hidden/inaccessible interior
 	 */
 	@Test
 	@Ignore
 	public void testDecorate() throws Exception {
-		NumberProvider numberProvider = NumberProvider.getInstance();
+		NumberProvider numberProvider = RandomNumberProvider.getInstance();
 		RomanProvider decorator = new RomanProvider(numberProvider);
 		assertThat(decorator.nextRoman(), equalTo("XXI"));
 		assertThat(decorator.nextRoman(), equalTo("XXII"));
@@ -47,8 +48,10 @@ public class RomanProviderTest {
 
 	@Test
 	public void testDecoratePrivateField() throws Exception {
-		NumberProvider numberProvider = NumberProvider.getInstance();
-		access(numberProvider).setNr(21);
+		NumberProvider numberProvider = RandomNumberProvider.getInstance();
+		unlock(numberProvider)
+				.features(UnlockedNumberProvider.class)
+				.setNr(21);
 		RomanProvider decorator = new RomanProvider(numberProvider);
 		assertThat(decorator.nextRoman(), equalTo("XXI"));
 		assertThat(decorator.nextRoman(), equalTo("XXII"));
@@ -56,16 +59,21 @@ public class RomanProviderTest {
 
 	@Test
 	public void testDecorateConstructor() throws Exception {
-		NumberProvider numberProvider = access(NumberProvider.class).create(21);
+		NumberProvider numberProvider = ClassAccess
+				.unlock(RandomNumberProvider.class)
+				.features(UnlockedStaticNumberProvider.class)
+				.create(21);
 		RomanProvider decorator = new RomanProvider(numberProvider);
 		assertThat(decorator.nextRoman(), equalTo("XXI"));
 		assertThat(decorator.nextRoman(), equalTo("XXII"));
 	}
-	
+
 	@Test
 	public void testDecoratePrivateMethod() throws Exception {
-		NumberProvider numberProvider = NumberProvider.getInstance();
-		access(numberProvider).reset(21);
+		NumberProvider numberProvider = RandomNumberProvider.getInstance();
+		unlock(numberProvider)
+				.features(UnlockedNumberProvider.class)
+				.reset(21);
 		RomanProvider decorator = new RomanProvider(numberProvider);
 		assertThat(decorator.nextRoman(), equalTo("XXI"));
 		assertThat(decorator.nextRoman(), equalTo("XXII"));
@@ -73,29 +81,52 @@ public class RomanProviderTest {
 
 	@Test
 	public void testDecorateStaticField() throws Exception {
-		NumberProvider numberProvider = access(NumberProvider.class).create(21);
-		access(NumberProvider.class).setINSTANCE(numberProvider);
-		RomanProvider decorator = new RomanProvider(NumberProvider.getInstance());
+		NumberProvider numberProvider = ClassAccess
+				.unlock(RandomNumberProvider.class)
+				.features(UnlockedStaticNumberProvider.class)
+				.create(21);
+		ClassAccess
+				.unlock(RandomNumberProvider.class)
+				.features(UnlockedStaticNumberProvider.class)
+				.setINSTANCE(numberProvider);
+		RomanProvider decorator = new RomanProvider(RandomNumberProvider.getInstance());
 		assertThat(decorator.nextRoman(), equalTo("XXI"));
 		assertThat(decorator.nextRoman(), equalTo("XXII"));
 	}
-	
-	private UnlockedConstructorNumberProvider access(Class<NumberProvider> clazz) throws NoSuchMethodException {
-		return ClassAccess.unlock(clazz).features(UnlockedConstructorNumberProvider.class);
-	}
 
-	private UnlockedNumberProvider access(NumberProvider numberProvider) throws NoSuchMethodException {
-		return unlock(numberProvider).features(UnlockedNumberProvider.class);
+	@Test
+	public void testDecorateStaticFinalField() throws Exception {
+		UnlockedReallyMeanNumberProvider bluePrint = ClassAccess
+				.unlock(ReallyMeanNumberProvider.class)
+				.features(UnlockedReallyMeanNumberProvider.class);
+
+		ReallyMeanNumberProvider numberProvider = bluePrint.create();
+		bluePrint.setFINAL_INSTANCE(numberProvider);
+		unlock(numberProvider)
+				.features(UnlockedNumberProvider.class)
+				.setNr(21);
+
+		RomanProvider decorator = new RomanProvider(ReallyMeanNumberProvider.getInstance());
+		assertThat(decorator.nextRoman(), equalTo("XXI"));
+		assertThat(decorator.nextRoman(), equalTo("XXII"));
 	}
 
 	private static interface UnlockedNumberProvider {
 		void setNr(int nr);
+
 		void reset(int resetNr);
 	}
 
-	private static interface UnlockedConstructorNumberProvider {
-		NumberProvider create(int seed);
+	private static interface UnlockedStaticNumberProvider {
+		RandomNumberProvider create(int seed);
+
 		void setINSTANCE(NumberProvider provider);
+	}
+
+	private static interface UnlockedReallyMeanNumberProvider {
+		ReallyMeanNumberProvider create();
+
+		void setFINAL_INSTANCE(ReallyMeanNumberProvider provider);
 	}
 
 }
