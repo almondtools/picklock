@@ -5,7 +5,7 @@ import java.lang.reflect.Modifier;
 
 /**
  * unfortunately some java compiler do inline literal constants. This setter may change the constant, but does not change inlined literals, resulting in strange effects.
- * better avoid setting static final variables or make sure, that they cannot be inlined (e.g. by making a its value a trivial functional expression)
+ * better avoid setting static final variables or make sure, that they cannot be inlined (e.g. by making its value a trivial functional expression)
  */
 public class StaticSetter implements StaticMethodInvocationHandler {
 

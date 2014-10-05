@@ -22,11 +22,12 @@ public class InvocationResolver {
 
 	protected MethodInvocationHandler findInvocationHandler(Method method) throws NoSuchMethodException {
 		String methodName = method.getName();
+		Class<?> resultType = method.getReturnType();
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		Class<?>[] exceptionTypes = method.getExceptionTypes();
 		Class<?> returnType = method.getReturnType();
 		try {
-			return findMethod(methodName, parameterTypes, exceptionTypes);
+			return findMethod(methodName, resultType, parameterTypes, exceptionTypes);
 		} catch (NoSuchMethodException e) {
 			try {
 				if (methodName.length() > 3 && methodName.startsWith(SET) && parameterTypes.length == 1 && exceptionTypes.length == 0) {
@@ -72,7 +73,7 @@ public class InvocationResolver {
 		throw new NoSuchFieldException(fieldSignature(fieldNames, type));
 	}
 
-	protected MethodInvoker findMethod(String methodName, Class<?>[] parameterTypes, Class<?>[] exceptionTypes) throws NoSuchMethodException {
+	protected MethodInvoker findMethod(String methodName, Class<?> resultType, Class<?>[] parameterTypes, Class<?>[] exceptionTypes) throws NoSuchMethodException {
 		Class<?> currentClass = this.innerClass;
 		while (currentClass != Object.class) {
 			try {
@@ -84,7 +85,7 @@ public class InvocationResolver {
 			}
 			currentClass = currentClass.getSuperclass();
 		}
-		throw new NoSuchMethodException(methodSignature(methodName, parameterTypes, exceptionTypes));
+		throw new NoSuchMethodException(methodSignature(methodName, resultType, parameterTypes, exceptionTypes));
 	}
 
 }

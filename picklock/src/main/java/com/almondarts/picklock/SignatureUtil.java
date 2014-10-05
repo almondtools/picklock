@@ -1,6 +1,7 @@
 package com.almondarts.picklock;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public final class SignatureUtil {
@@ -20,21 +21,39 @@ public final class SignatureUtil {
 	}
 
 	public static String fieldSignature(List<String> fieldNames, Class<?> type) {
-		return type.getSimpleName() + ' ' + fieldNames;
+		StringBuilder buffer = new StringBuilder()
+		.append(typeName(type))
+		.append(' ');
+		Iterator<String> iterator = fieldNames.iterator();
+		if (iterator.hasNext()) {
+			buffer.append(iterator.next());
+		}
+		while(iterator.hasNext()) {
+			buffer.append('|');
+			buffer.append(iterator.next());
+		}
+		return buffer.toString();
 	}
 
-	public static String methodSignature(String methodName, Class<?>[] parameterTypes, Class<?>[] exceptionTypes) {
-		return "? " + methodName + parameters(parameterTypes) + " throws " + exceptions(exceptionTypes);
+	public static String methodSignature(String methodName, Class<?> resultType, Class<?>[] parameterTypes, Class<?>[] exceptionTypes) {
+		return typeName(resultType) + ' ' + methodName + parameters(parameterTypes) + throwsClause(exceptionTypes);
+	}
+
+	private static String throwsClause(Class<?>[] exceptionTypes) {
+		if (exceptionTypes.length == 0) {
+			return "";
+		}
+		return " throws " + exceptions(exceptionTypes);
 	}
 
 	private static String parameters(Class<?>[] parameterTypes) {
 		StringBuilder buffer = new StringBuilder();
 		buffer.append('(');
 		if (parameterTypes.length > 0) {
-			buffer.append(parameterTypes[0].getSimpleName());
+			buffer.append(typeName(parameterTypes[0]));
 		}
 		for (int i = 1; i < parameterTypes.length; i++) {
-			buffer.append(',').append(parameterTypes[i].getSimpleName());
+			buffer.append(',').append(typeName(parameterTypes[i]));
 		}
 		buffer.append(')');
 		return buffer.toString();
@@ -43,12 +62,15 @@ public final class SignatureUtil {
 	private static String exceptions(Class<?>[] exceptionTypes) {
 		StringBuilder buffer = new StringBuilder();
 		if (exceptionTypes.length > 0) {
-			buffer.append(exceptionTypes[0].getSimpleName());
+			buffer.append(typeName(exceptionTypes[0]));
 		}
 		for (int i = 1; i < exceptionTypes.length; i++) {
-			buffer.append(',').append(exceptionTypes[i].getSimpleName());
+			buffer.append(',').append(typeName(exceptionTypes[i]));
 		}
 		return buffer.toString();
 	}
 
+	private static String typeName(Class<?> clazz) {
+		return clazz.getSimpleName();
+	}
 }

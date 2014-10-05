@@ -74,36 +74,36 @@ public class InvocationResolverTest {
 
 	@Test
 	public void testFindMethod() throws Exception {
-		assertThat(resolver.findMethod("methoda", new Class[0], new Class[0]), notNullValue());
-		assertThat(resolver.findMethod("methodb", new Class[]{String.class}, new Class[0]), notNullValue());
-		assertThat(resolver.findMethod("methodc", new Class[]{String.class}, new Class[]{Exception.class}), notNullValue());
-		assertThat(resolver.findMethod("methodd", new Class[]{String.class}, new Class[]{Exception.class}), notNullValue());
-		assertThat(resolver.findMethod("methode", new Class[]{String.class}, new Class[]{Exception.class}), notNullValue());
+		assertThat(resolver.findMethod("methoda", String.class, new Class[0], new Class[0]), notNullValue());
+		assertThat(resolver.findMethod("methodb", String.class, new Class[]{String.class}, new Class[0]), notNullValue());
+		assertThat(resolver.findMethod("methodc", String.class, new Class[]{String.class}, new Class[]{Exception.class}), notNullValue());
+		assertThat(resolver.findMethod("methodd", String.class, new Class[]{String.class}, new Class[]{Exception.class}), notNullValue());
+		assertThat(resolver.findMethod("methode", String.class, new Class[]{String.class}, new Class[]{Exception.class}), notNullValue());
 	}
 
 	@Test(expected = NoSuchMethodException.class)
 	public void testFindMethodNonExisting() throws Exception {
-		assertThat(resolver.findMethod("methodz", new Class[0], new Class[0]), notNullValue());
+		assertThat(resolver.findMethod("methodz", String.class, new Class[0], new Class[0]), notNullValue());
 	}
 
 	@Test(expected = NoSuchMethodException.class)
 	public void testFindMethodWronglySignature() throws Exception {
-		assertThat(resolver.findMethod("methodb", new Class[0], new Class[0]), notNullValue());
+		assertThat(resolver.findMethod("methodb", String.class, new Class[0], new Class[0]), notNullValue());
 	}
 
 	@Test(expected = NoSuchMethodException.class)
 	public void testFindMethodWronglyTyped() throws Exception {
-		assertThat(resolver.findMethod("methodb", new Class[]{int.class}, new Class[0]), notNullValue());
+		assertThat(resolver.findMethod("methodb", String.class, new Class[]{int.class}, new Class[0]), notNullValue());
 	}
 
 	@Test(expected = NoSuchMethodException.class)
 	public void testFindMethodWronglyExceptionTyped() throws Exception {
-		assertThat(resolver.findMethod("methodb", new Class[]{String.class}, new Class[]{Exception.class}), notNullValue());
+		assertThat(resolver.findMethod("methodb", String.class, new Class[]{String.class}, new Class[]{Exception.class}), notNullValue());
 	}
 
 	@Test(expected = NoSuchMethodException.class)
 	public void testFindMethodWronglyExceptionTypedInSuperclass() throws Exception {
-		assertThat(resolver.findMethod("methode", new Class[]{String.class}, new Class[]{IOException.class}), notNullValue());
+		assertThat(resolver.findMethod("methode", String.class, new Class[]{String.class}, new Class[]{IOException.class}), notNullValue());
 	}
 
 	private static class TestClass {

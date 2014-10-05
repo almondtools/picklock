@@ -23,11 +23,12 @@ public class StaticInvocationResolver {
 
 	protected StaticMethodInvocationHandler findInvocationHandler(Method method) throws NoSuchMethodException {
 		String methodName = method.getName();
+		Class<?> resultType = method.getReturnType();
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		Class<?>[] exceptionTypes = method.getExceptionTypes();
 		Class<?> returnType = method.getReturnType();
 		try {
-			return findMethod(methodName, parameterTypes, exceptionTypes);
+			return findMethod(methodName, resultType, parameterTypes, exceptionTypes);
 		} catch (NoSuchMethodException e) {
 			try {
 				if (methodName.equals(CONSTRUCTOR)) {
@@ -98,7 +99,7 @@ public class StaticInvocationResolver {
 		throw new NoSuchFieldException(fieldSignature(fieldNames, type));
 	}
 
-	protected StaticMethodInvoker findMethod(String methodName, Class<?>[] parameterTypes, Class<?>[] exceptionTypes) throws NoSuchMethodException {
+	protected StaticMethodInvoker findMethod(String methodName, Class<?> resultType, Class<?>[] parameterTypes, Class<?>[] exceptionTypes) throws NoSuchMethodException {
 		Class<?> nextType = type;
 		while (nextType != Object.class) {
 			try {
@@ -110,7 +111,7 @@ public class StaticInvocationResolver {
 			}
 			nextType = nextType.getSuperclass();
 		}
-		throw new NoSuchMethodException(methodSignature(methodName, parameterTypes, exceptionTypes));
+		throw new NoSuchMethodException(methodSignature(methodName, resultType, parameterTypes, exceptionTypes));
 	}
 
 }
