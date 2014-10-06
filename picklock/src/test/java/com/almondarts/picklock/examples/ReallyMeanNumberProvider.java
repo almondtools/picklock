@@ -17,6 +17,7 @@ public final class ReallyMeanNumberProvider implements NumberProvider{
 		this.nr = (int) (Math.random() * 100.0);
 	}
 
+	@Override
 	public int nextNr() {
 		return nr++;
 	}
