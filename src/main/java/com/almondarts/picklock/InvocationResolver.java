@@ -11,6 +11,7 @@ import java.util.List;
 
 public class InvocationResolver {
 
+	private static final String IS = "is";
 	private static final String GET = "get";
 	private static final String SET = "set";
 	
@@ -34,6 +35,8 @@ public class InvocationResolver {
 					return findSetter(methodName, parameterTypes[0]);
 				} else if (methodName.length() > 3 && methodName.startsWith(GET) && parameterTypes.length == 0 && exceptionTypes.length == 0) {
 					return findGetter(methodName, returnType);
+				} else if (methodName.length() > 2 && methodName.startsWith(IS) && parameterTypes.length == 0 && exceptionTypes.length == 0 && (returnType == Boolean.class || returnType == boolean.class)) {
+					return findIs(methodName, returnType);
 				} else {
 					throw e;
 				}
@@ -50,6 +53,11 @@ public class InvocationResolver {
 
 	protected FieldGetter findGetter(String methodName, Class<?> type) throws NoSuchFieldException {
 		String fieldName = methodName.substring(3);
+		return new FieldGetter(findField(fieldName, type));
+	}
+
+	protected FieldGetter findIs(String methodName, Class<?> type) throws NoSuchFieldException {
+		String fieldName = methodName.substring(2);
 		return new FieldGetter(findField(fieldName, type));
 	}
 

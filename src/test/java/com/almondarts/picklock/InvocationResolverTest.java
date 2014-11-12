@@ -64,12 +64,27 @@ public class InvocationResolverTest {
 
 	@Test(expected=NoSuchFieldException.class)
 	public void testFindGetterOnNonexistent() throws Exception {
-		resolver.findGetter("setX", String.class);
+		resolver.findGetter("getX", String.class);
 	}
 
 	@Test(expected=NoSuchFieldException.class)
 	public void testFindGetterOnWronglyTyped() throws Exception {
-		resolver.findGetter("setS", int.class);
+		resolver.findGetter("getS", int.class);
+	}
+
+	@Test
+	public void testFindIs() throws Exception {
+		assertThat(resolver.findIs("isB", boolean.class), notNullValue());
+	}
+
+	@Test(expected=NoSuchFieldException.class)
+	public void testFindIsOnNonexistent() throws Exception {
+		resolver.findIs("isX", boolean.class);
+	}
+
+	@Test(expected=NoSuchFieldException.class)
+	public void testFindIsOnWronglyTyped() throws Exception {
+		resolver.findIs("isS", int.class);
 	}
 
 	@Test
