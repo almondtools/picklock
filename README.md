@@ -7,43 +7,72 @@ The Objectives of Picklock follow her:
 
 Picklocking a sealed class
 ==========================
-How would one access a private method like
+Consider following java class
 ```Java
-public class Foo {
+public class House {
 
-	public void bar(String text) {
-		...
+	private Key houseKey;
+	private boolean locked;
+	private List<Furniture> furniture;
+	...
+
+	public boolean open(Key key) {
+		if (houseKey.equals(key)) {
+			open();
+		}
+		return !locked;
 	}
+
+	private void open() {
+		locked = false;
+	}
+
+	public List<Furniture> listFurniture() {
+		if (locked) {
+			throw new UnsupportedOperationException("cannot list furniture if house is locked");
+		}
+		return furniture;
+	}
+
+	...
 }
 ```
 
-The default way is:
+Not knowing the house key will not give you access to the house and its furniture.
+
+The classic way to access the house would:
 ```Java
-	public void callBar(Foo foo, String text)  throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-		Class<? extends Foo> fooClass = foo.getClass();
-		Method bar = fooClass.getDeclaredMethod("bar", new Class<?>[]{String.class});
-		bar.setAccessible(true);
-		bar.invoke(foo,new Object[]{text});
+    public List<Furniture> open(House house) throws Exception {
+		Class<? extends House> houseClass = house.getClass(); // class lookup
+		Method open = houseClass.getDeclaredMethod("open", new Class<?>[0]); // method lookup, type signature wrapping
+		open.setAccessible(true); // access enabling
+		open.invoke(house,new Object[0]); // non object oriented call, argument wrapping
+		return listFurniture();
 	}
 ```
 
 The picklock style would be following
 ```Java
-	public void callBar(Foo foo, String text) throws NoSuchMethodException {
-		UnlockedFoo unlockedFoo = ObjectAccess.unlock(foo).features(UnlockedFoo.class);
-		unlockedFoo.bar(text);
+    public List<Furniture> open(House house) throws NoSuchMethodException {
+		PicklockedHouse picklockedHouse = ObjectAccess.unlock(house).features(PicklockedHouse.class); // unlock interface
+		picklockedHouse.open(); // call unlocked method
+		return house.listFurniture();
 	}
 	
-	interface UnlockedFoo {
-		void bar(String text);
+	interface PicklockedHouse {
+		void open();
 	}
 ```
 
-* No need to lookup the class
-* No need to lookup the method
+Of course one may also unlock methods with arguments, simply repeat the signature of the private method you want to use in
+the picklocked interface.
+
+Regarding the picklock solution, there is
+* No need to lookup the class of House
+* No need to lookup the method open
 * No need to wrap argument types and arguments
 * No need to enable invocations
-* No need to invocate in a non-object-oriented way
+* No need to invocate functions in a non-object-oriented way
 
 Snooping Private State
 ======================
@@ -57,23 +86,27 @@ Instantiating Singletons
 ========================
 ...
 
-Controlled Private Access
-=========================
-The worst (non-prototypic) application of reflection I ever saw was a web application encoding reflective calls in the URL-Query-Params of a HTTP-Request, e.g. 
+Random Access Reflection is bad
+===============================
 
-[http://foo.bar?object=x&method=foo&arg1=bar&arg2=null](#)
+There are several reasons why one should avoid classical random access reflection in java, e.g.
+* reflection is not performant
+* reflection is cumbersome (several string lookups, security disabling)
+* reflection using Strings is not robust to renamings
+* reflection is an indicator of bad software design
+* reflection may cause security leaks (if the input string is unvalidated user input, e.g. a url parameter)
+* reflection may cause problems with the type system
 
-would call reflectively 
+Controlled Private Access Reflection via Picklock is preferrable
+================================================================
 
-```Java
-x.foo(bar)
-```
+Picklock enables you to use reflection without may of the common problems of reflection
+* picklock is convenient to use (2 steps: unlock interface, call method)
+* picklock uses method invocation, no Strings at All (mapping of methods is done by conventions)
+* picklock uses a kind of Adaptor/Decorator design pattern, which is the object oriented way of exposing a new feature
+* picklock prevents security issues because it does not depend on Strings
+* picklock is independent from the concrete type of the accessed object
 
-The creator might have thought: Really cool code - the maintainer would certainly disagree. Such an interface is really flexible, but a huge security leak, because it allows **Random Access** to any private member. 
-
-Utilizing the metaphor: This is not a picklocker which tries to sneak in an find a certain information, this is a burglar breaking the door, and breaking lots of glass and furniture.
-
-Picklock uses the concept of **Controlled Private Access**. Any Member that should be accessed must be defined in the UnlockedFacade object. Any Member not defined in such a Facade object is not accessible.
 
 Maintaining and Tracking Picklocked Objects
 ===========================================
@@ -81,7 +114,7 @@ A main Problem of Java Reflection is, that it fails at runtime, not at compile t
 
 Picklock attempts will probably never fail at compile time, but some coding discipline is sufficient, to let picklock fail at build time (i.e. at test time). What is to be done:
 * determine any pair of types (locked class, unlocked facade class)
-* write a test containing only "ObjectAccess.check(foo.getClass()).isUnlockable(UnlockedFoo.class);"
+* write a test containing only "ObjectAccess.check(house.getClass()).isUnlockable(PicklockedHouse.class);"
 * this test would always fail, if the internals used by Picklock do not exist any more (e.g. because the foreign implementation changed)
 
 
