@@ -15,14 +15,14 @@ public class House {
 	}
 
 	public boolean lock(Key key) {
-		if (key.equals(houseKey)) {
+		if (houseKey.equals(key)) {
 			close();
 		}
 		return locked;
 	}
 
 	public boolean open(Key key) {
-		if (key.equals(houseKey)) {
+		if (houseKey.equals(key)) {
 			open();
 		}
 		return !locked;
