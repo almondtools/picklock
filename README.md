@@ -114,7 +114,7 @@ A main Problem of Java Reflection is, that it fails at runtime, not at compile t
 
 Picklock attempts will probably never fail at compile time, but some coding discipline is sufficient, to let picklock fail at build time (i.e. at test time). What is to be done:
 * determine any pair of types (locked class, unlocked facade class)
-* write a test containing only "ObjectAccess.check(house.getClass()).isUnlockable(PicklockedHouse.class);"
+* write a test containing only "ObjectAccess.check(house).isUnlockable(PicklockedHouse.class);"
 * this test would always fail, if the internals used by Picklock do not exist any more (e.g. because the foreign implementation changed)
 
 
