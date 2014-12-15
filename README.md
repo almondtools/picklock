@@ -71,8 +71,8 @@ Regarding the picklock solution, there is
 * No need to lookup the class of House
 * No need to lookup the method open
 * No need to wrap argument types and arguments
-* No need to enable invocations
-* No need to invocate functions in a non-object-oriented way
+* No need to enable access to private members
+* No need to call functions in a non-object-oriented way
 
 Snooping Private State
 ======================
