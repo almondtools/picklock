@@ -53,7 +53,33 @@ public class HouseTest {
 		assertThat(furniture, contains(instanceOf(Safe.class)));
 	}
 	
+	@Test
+	public void testAquiringHousekey() throws Exception {
+		PicklockedKey picklockableHouse = ObjectAccess.unlock(house).features(PicklockedKey.class);
+		key = picklockableHouse.getHouseKey();
+		house.open(key);
+		List<Furniture> furniture = house.listFurniture();
+		assertThat(furniture, contains(instanceOf(Safe.class)));
+	}
+	
+	@Test
+	public void testChangingLock() throws Exception {
+		PicklockedLock picklockableHouse = ObjectAccess.unlock(house).features(PicklockedLock.class);
+		picklockableHouse.setHouseKey(key);
+		house.open(key);
+		List<Furniture> furniture = house.listFurniture();
+		assertThat(furniture, contains(instanceOf(Safe.class)));
+	}
+	
 	interface Picklocked {
 		void open();
+	}
+
+	interface PicklockedKey {
+		Key getHouseKey();
+	}
+
+	interface PicklockedLock {
+		void setHouseKey(Key key);
 	}
 }
