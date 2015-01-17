@@ -24,15 +24,13 @@ public class InvocationResolver {
 
 	protected MethodInvocationHandler findInvocationHandler(Method method) throws NoSuchMethodException {
 		try {
-			return findMethod(method);
+			return createMethodInvocator(method);
 		} catch (NoSuchMethodException e) {
 			try {
 				if (isSetter(method)) {
-					return findSetter(propertyOf(method), method.getParameterTypes()[0]);
-				} else if (isGetter(method)) {
-					return findGetter(propertyOf(method), method.getReturnType());
-				} else if (isBooleanGetter(method)) {
-					return findIs(propertyOf(method), method.getReturnType());
+					return createSetterInvocator(method);
+				} else if (isGetter(method) || isBooleanGetter(method)) {
+					return createGetterInvocator(method);
 				} else {
 					throw e;
 				}
@@ -42,16 +40,12 @@ public class InvocationResolver {
 		}
 	}
 
-	protected FieldSetter findSetter(String fieldName, Class<?> type) throws NoSuchFieldException {
-		return new FieldSetter(findField(fieldName, type));
+	private MethodInvocationHandler createSetterInvocator(Method method) throws NoSuchFieldException {
+		return new FieldSetter(findField(propertyOf(method), method.getParameterTypes()[0]));
 	}
 
-	protected FieldGetter findGetter(String fieldName, Class<?> type) throws NoSuchFieldException {
-		return new FieldGetter(findField(fieldName, type));
-	}
-
-	protected FieldGetter findIs(String fieldName, Class<?> type) throws NoSuchFieldException {
-		return new FieldGetter(findField(fieldName, type));
+	private MethodInvocationHandler createGetterInvocator(Method method) throws NoSuchFieldException {
+		return new FieldGetter(findField(propertyOf(method), method.getReturnType()));
 	}
 
 	protected Field findField(String fieldPattern, Class<?> type) throws NoSuchFieldException {
@@ -74,7 +68,7 @@ public class InvocationResolver {
 		throw new NoSuchFieldException(fieldSignature(fieldNames, type));
 	}
 
-	protected MethodInvocationHandler findMethod(Method method) throws NoSuchMethodException {
+	protected MethodInvocationHandler createMethodInvocator(Method method) throws NoSuchMethodException {
 		Class<?> currentClass = this.innerClass;
 		while (currentClass != Object.class) {
 			try {

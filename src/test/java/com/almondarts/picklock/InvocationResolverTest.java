@@ -7,7 +7,6 @@ import static org.junit.Assert.assertThat;
 import java.io.IOException;
 import java.lang.reflect.Method;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -44,91 +43,44 @@ public class InvocationResolverTest {
 	}
 
 	@Test
-	public void testFindSetter() throws Exception {
-		assertThat(resolver.findSetter("S", String.class), notNullValue());
-		assertThat(resolver.findSetter("I", int.class), notNullValue());
-	}
-
-	@Test(expected=NoSuchFieldException.class)
-	public void testFindSetterOnNonexistent() throws Exception {
-		resolver.findSetter("X", String.class);
-	}
-
-	@Test(expected=NoSuchFieldException.class)
-	public void testFindSetterOnWronglyTyped() throws Exception {
-		resolver.findSetter("S", int.class);
-	}
-
-	@Test
-	public void testFindGetter() throws Exception {
-		assertThat(resolver.findGetter("S", String.class), notNullValue());
-		assertThat(resolver.findGetter("I", int.class), notNullValue());
-	}
-
-	@Test(expected=NoSuchFieldException.class)
-	public void testFindGetterOnNonexistent() throws Exception {
-		resolver.findGetter("X", String.class);
-	}
-
-	@Test(expected=NoSuchFieldException.class)
-	public void testFindGetterOnWronglyTyped() throws Exception {
-		resolver.findGetter("S", int.class);
-	}
-
-	@Test
-	public void testFindIs() throws Exception {
-		assertThat(resolver.findIs("B", boolean.class), notNullValue());
-	}
-
-	@Test(expected=NoSuchFieldException.class)
-	public void testFindIsOnNonexistent() throws Exception {
-		resolver.findIs("X", boolean.class);
-	}
-
-	@Test(expected=NoSuchFieldException.class)
-	public void testFindIsOnWronglyTyped() throws Exception {
-		resolver.findIs("S", int.class);
-	}
-
-	@Test
 	public void testFindMethod() throws Exception {
 		Method[] methods = Methods.class.getDeclaredMethods();
 		assertThat(methods.length, equalTo(5));
-		assertThat(resolver.findMethod(methods[0]), notNullValue());
-		assertThat(resolver.findMethod(methods[1]), notNullValue());
-		assertThat(resolver.findMethod(methods[2]), notNullValue());
-		assertThat(resolver.findMethod(methods[3]), notNullValue());
-		assertThat(resolver.findMethod(methods[4]), notNullValue());
+		assertThat(resolver.createMethodInvocator(methods[0]), notNullValue());
+		assertThat(resolver.createMethodInvocator(methods[1]), notNullValue());
+		assertThat(resolver.createMethodInvocator(methods[2]), notNullValue());
+		assertThat(resolver.createMethodInvocator(methods[3]), notNullValue());
+		assertThat(resolver.createMethodInvocator(methods[4]), notNullValue());
 	}
 
 	@Test(expected = NoSuchMethodException.class)
 	public void testFindMethodNonExisting() throws Exception {
 		Method[] badmethods = BadMethods.class.getDeclaredMethods();
-		resolver.findMethod(badmethods[0]);
+		resolver.createMethodInvocator(badmethods[0]);
 	}
 
 	@Test(expected = NoSuchMethodException.class)
 	public void testFindMethodWronglySignature() throws Exception {
 		Method[] badmethods = BadMethods.class.getDeclaredMethods();
-		resolver.findMethod(badmethods[1]);
+		resolver.createMethodInvocator(badmethods[1]);
 	}
 
 	@Test(expected = NoSuchMethodException.class)
 	public void testFindMethodWronglyTyped() throws Exception {
 		Method[] badmethods = BadMethods.class.getDeclaredMethods();
-		resolver.findMethod(badmethods[2]);
+		resolver.createMethodInvocator(badmethods[2]);
 	}
 
 	@Test(expected = NoSuchMethodException.class)
 	public void testFindMethodWronglyExceptionTyped() throws Exception {
 		Method[] badmethods = BadMethods.class.getDeclaredMethods();
-		resolver.findMethod(badmethods[3]);
+		resolver.createMethodInvocator(badmethods[3]);
 	}
 
 	@Test(expected = NoSuchMethodException.class)
 	public void testFindMethodWronglyExceptionTypedInSuperclass() throws Exception {
 		Method[] badmethods = BadMethods.class.getDeclaredMethods();
-		resolver.findMethod(badmethods[4]);
+		resolver.createMethodInvocator(badmethods[4]);
 	}
 	
 	interface Methods {
