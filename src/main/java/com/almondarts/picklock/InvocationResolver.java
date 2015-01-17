@@ -73,13 +73,13 @@ public class InvocationResolver {
 		while (currentClass != Object.class) {
 			try {
 				if (isAutoPicklocked(method)) {
-					String defaultName = containsAutopicklocked(method.getAnnotations(), method.getReturnType());
-					Method candidate = findPicklockedMethod(currentClass, method.getName(), method.getReturnType(), defaultName, method.getParameterTypes(), method.getParameterAnnotations());
+					String defaultName = containsConvertable(method.getAnnotations(), method.getReturnType());
+					Method candidate = findConvertableMethod(currentClass, method.getName(), method.getReturnType(), defaultName, method.getParameterTypes(), method.getParameterAnnotations());
 					if (Arrays.equals(method.getExceptionTypes(), candidate.getExceptionTypes())) {
 						return new ConvertingMethodInvoker(candidate, method);
 					}
 				} else {
-					Method candidate = currentClass.getDeclaredMethod(method.getName(), method.getParameterTypes());
+					Method candidate = findMatchingMethod(method, currentClass);
 					if (Arrays.equals(method.getExceptionTypes(), candidate.getExceptionTypes())) {
 						return new MethodInvoker(candidate);
 					}
@@ -100,24 +100,28 @@ public class InvocationResolver {
 		for (int i = 0; i < parameterTypes.length; i++) {
 			Class<?> parameterType = parameterTypes[i];
 			Annotation[] annotations = parameterAnnotations[i];
-			if (containsAutopicklocked(annotations, parameterType) != null) {
+			if (containsConvertable(annotations, parameterType) != null) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private Method findPicklockedMethod(Class<?> currentClass, String name, Class<?> resultType, String annotatedName, Class<?>[] parameterTypes, Annotation[][] parameterAnnotations) throws NoSuchMethodException {
-		String[] convert = determineParamsToConvert(parameterAnnotations, parameterTypes);
+	private Method findMatchingMethod(Method method, Class<?> currentClass) throws NoSuchMethodException {
+		return currentClass.getDeclaredMethod(method.getName(), method.getParameterTypes());
+	}
+
+	private Method findConvertableMethod(Class<?> currentClass, String name, Class<?> resultType, String convertResult, Class<?>[] parameterTypes, Annotation[][] parameterAnnotations) throws NoSuchMethodException {
+		String[] conversionVector = determineNeededConversions(parameterAnnotations, parameterTypes);
 		for (Method candidate : currentClass.getDeclaredMethods()) {
-			if (matchesSignature(candidate, name, resultType, annotatedName, parameterTypes, convert)) {
+			if (matchesSignature(candidate, name, resultType, convertResult, parameterTypes, conversionVector)) {
 				return candidate;
 			}
 		}
 		throw new NoSuchMethodException();
 	}
 
-	private boolean matchesSignature(Method candidate, String name, Class<?> resultType, String annotatedName, Class<?>[] parameterTypes, String[] convert) {
+	private boolean matchesSignature(Method candidate, String name, Class<?> resultType, String convertResult, Class<?>[] parameterTypes, String[] convertArguments) {
 		if (!candidate.getName().equals(name)) {
 			return false;
 		}
@@ -128,31 +132,30 @@ public class InvocationResolver {
 		for (int i = 0; i < candidateParameters.length; i++) {
 			Class<?> candidateType = candidateParameters[i];
 			Class<?> requiredType = parameterTypes[i];
-			if (isCompliant(requiredType, candidateType, convert[i])) {
-				continue;
+			if (!isCompliant(requiredType, candidateType, convertArguments[i])) {
+				return false;
 			}
-			return false;
 		}
-		return isCompliant(resultType, candidate.getReturnType(), annotatedName) ;
+		return isCompliant(resultType, candidate.getReturnType(), convertResult) ;
 	}
 
 	private boolean isCompliant(Class<?> requiredType, Class<?> candidateType, String annotatedName) {
 		return candidateType.equals(requiredType) || candidateType.getSimpleName().equals(annotatedName);
 	}
 
-	private String[] determineParamsToConvert(Annotation[][] parameterAnnotations, Class<?>[] parameterTypes) {
+	private String[] determineNeededConversions(Annotation[][] parameterAnnotations, Class<?>[] parameterTypes) {
 		String[] convert = new String[parameterAnnotations.length];
 		for (int i = 0; i < parameterAnnotations.length; i++) {
-			convert[i] = containsAutopicklocked(parameterAnnotations[i], parameterTypes[i]);
+			convert[i] = containsConvertable(parameterAnnotations[i], parameterTypes[i]);
 		}
 		return convert;
 	}
 
-	private String containsAutopicklocked(Annotation[] annotations, Class<?> defaultType) {
+	private String containsConvertable(Annotation[] annotations, Class<?> defaultType) {
 		for (Annotation annotation : annotations) {
 			if (annotation.annotationType() == Convert.class) {
-				Convert autoPicklock = (Convert) annotation;
-				String name = autoPicklock.value();
+				Convert convertable = (Convert) annotation;
+				String name = convertable.value();
 				if (name.isEmpty()) {
 					return defaultType.getSimpleName();
 				} else {

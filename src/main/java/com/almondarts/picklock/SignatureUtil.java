@@ -1,5 +1,7 @@
 package com.almondarts.picklock;
 
+import static com.almondarts.picklock.BoxingUtil.getUnboxed;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -18,22 +20,36 @@ public final class SignatureUtil {
 		String name = method.getName();
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		Class<?>[] exceptionTypes = method.getExceptionTypes();
-		Class<?> returnType = method.getReturnType();
-		return name.length() > 2 && name.startsWith(IS) && parameterTypes.length == 0 && exceptionTypes.length == 0 && (returnType == Boolean.class || returnType == boolean.class);
+		Class<?> returnType = getUnboxed(method.getReturnType());
+		return name.length() > 2 
+			&& name.startsWith(IS) 
+			&& parameterTypes.length ==0 
+			&& exceptionTypes.length == 0 
+			&& returnType == boolean.class;
 	}
 
 	public static boolean isGetter(Method method) {
 		String name = method.getName();
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		Class<?>[] exceptionTypes = method.getExceptionTypes();
-		return name.length() > 3 && name.startsWith(GET) && parameterTypes.length == 0 && exceptionTypes.length == 0;
+		Class<?> returnType = getUnboxed(method.getReturnType());
+		return name.length() > 3 
+			&& name.startsWith(GET) 
+			&& parameterTypes.length == 0 
+			&& exceptionTypes.length == 0 
+			&& returnType != void.class;
 	}
 
 	public static boolean isSetter(Method method) {
 		String name = method.getName();
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		Class<?>[] exceptionTypes = method.getExceptionTypes();
-		return name.length() > 3 && name.startsWith(SET) && parameterTypes.length == 1 && exceptionTypes.length == 0;
+		Class<?> returnType = getUnboxed(method.getReturnType());
+		return name.length() > 3 
+			&& name.startsWith(SET) 
+			&& parameterTypes.length == 1 
+			&& exceptionTypes.length == 0
+			&& returnType == void.class;
 	}
 
 	public static String propertyOf(Method method) {
