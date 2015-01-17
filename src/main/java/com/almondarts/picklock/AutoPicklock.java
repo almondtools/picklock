@@ -1,4 +1,4 @@
-package com.almondarts.picklock.examples.innerclass;
+package com.almondarts.picklock;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -6,6 +6,7 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
+import com.almondarts.picklock.AutoPicklock;
 import com.almondarts.picklock.ObjectAccess;
 
 public class ExampleObjectTest {
