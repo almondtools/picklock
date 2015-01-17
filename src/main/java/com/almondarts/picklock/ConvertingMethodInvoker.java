@@ -60,9 +60,7 @@ public class ConvertingMethodInvoker implements MethodInvocationHandler {
 				return ((ObjectAccess) invocationHandler).getObject();
 			}
 		}
-		Constructor<?> constructor = clazz.getConstructor();
-		constructor.setAccessible(true);
-		Object converted = constructor.newInstance();
+		Object converted = createBaseObject(clazz, accessibleClass);
 		Object accessible = ObjectAccess.unlock(converted).features(accessibleClass);
 		for (Method[] getSetPair : findProperties(accessibleClass)) {
 			Method get = getSetPair[0];
@@ -73,6 +71,22 @@ public class ConvertingMethodInvoker implements MethodInvocationHandler {
 			set.invoke(accessible, value);
 		}
 		return converted;
+	}
+
+	private Object createBaseObject(Class<?> clazz, Class<?> accessibleClass) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+		Construct construct = accessibleClass.getAnnotation(Construct.class);
+		if (construct != null) {
+			Constructor<? extends ConstructorConfig> configConstructor = construct.value().getDeclaredConstructor();
+			configConstructor.setAccessible(true);
+			ConstructorConfig config = configConstructor.newInstance();
+			Constructor<?> constructor = clazz.getDeclaredConstructor(config.signature());
+			constructor.setAccessible(true);
+			return constructor.newInstance(config.arguments());
+		} else {
+			Constructor<?> constructor = clazz.getDeclaredConstructor();
+			constructor.setAccessible(true);
+			return constructor.newInstance();
+		}
 	}
 
 	private List<Method[]> findProperties(Class<?> accessibleClass) {

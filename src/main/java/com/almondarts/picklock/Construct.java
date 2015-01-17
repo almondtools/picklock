@@ -6,8 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.PARAMETER})
-public @interface AutoPicklock {
+@Target({ElementType.TYPE})
+public @interface Construct {
 
-	String value() default "";
+	Class<? extends ConstructorConfig> value();
 }

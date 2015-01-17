@@ -26,6 +26,10 @@ public class ExampleObject {
 		return arg.state != null;
 	}
 
+	private boolean useInnerStatic(InnerStaticWithoutStandardConstructor arg)  {
+		return arg.state != null;
+	}
+
 	private Inner createInner()  {
 		return new Inner();
 	}

@@ -98,7 +98,7 @@ public class InvocationResolver {
 	}
 
 	private boolean isAutoPicklocked(Method method) {
-		if (method.getAnnotation(AutoPicklock.class) != null) {
+		if (method.getAnnotation(Convert.class) != null) {
 			return true;
 		}
 		Annotation[][] parameterAnnotations = method.getParameterAnnotations();
@@ -153,8 +153,8 @@ public class InvocationResolver {
 
 	private String containsAutopicklocked(Annotation[] annotations, Class<?> defaultType) {
 		for (Annotation annotation : annotations) {
-			if (annotation.annotationType() == AutoPicklock.class) {
-				AutoPicklock autoPicklock = (AutoPicklock) annotation;
+			if (annotation.annotationType() == Convert.class) {
+				Convert autoPicklock = (Convert) annotation;
 				String name = autoPicklock.value();
 				if (name.isEmpty()) {
 					return defaultType.getSimpleName();

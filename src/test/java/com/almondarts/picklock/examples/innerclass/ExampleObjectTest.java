@@ -6,7 +6,9 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-import com.almondarts.picklock.AutoPicklock;
+import com.almondarts.picklock.Construct;
+import com.almondarts.picklock.ConstructorConfig;
+import com.almondarts.picklock.Convert;
 import com.almondarts.picklock.ObjectAccess;
 
 public class ExampleObjectTest {
@@ -67,11 +69,19 @@ public class ExampleObjectTest {
 		assertThat(unlockedExampleObject.useInnerStatic(s), is(true));
 	}
 
+	@Test
+	public void testInnerStaticClassArgumentNoStandardConstructor() throws Exception {
+		ExampleObject exampleObject = new ExampleObject("state");
+		UnlockedExampleWithConstructorConfig unlockedExampleObject = ObjectAccess.unlock(exampleObject).features(UnlockedExampleWithConstructorConfig.class);
+		assertThat(unlockedExampleObject.useInnerStatic(new InnerStaticWithoutStandardConstructor() {
+		}), is(true));
+	}
+
 	interface UnlockedExampleObject {
-		@AutoPicklock
+		@Convert
 		InnerStatic createInnerStatic();
 
-		boolean useInnerStatic(@AutoPicklock InnerStatic arg);
+		boolean useInnerStatic(@Convert InnerStatic arg);
 
 	}
 
@@ -82,10 +92,10 @@ public class ExampleObjectTest {
 	}
 
 	interface UnlockedExampleOther {
-		@AutoPicklock("InnerStatic")
+		@Convert("InnerStatic")
 		InnerStaticOther createInnerStatic();
 
-		boolean useInnerStatic(@AutoPicklock("InnerStatic") InnerStaticOther arg);
+		boolean useInnerStatic(@Convert("InnerStatic") InnerStaticOther arg);
 
 	}
 
@@ -94,13 +104,13 @@ public class ExampleObjectTest {
 
 	interface UnlockedExampleExceptionParam {
 
-		boolean useInnerStatic(@AutoPicklock InnerStaticException arg);
+		boolean useInnerStatic(@Convert InnerStaticException arg);
 
 	}
 
 	interface UnlockedExampleExceptionResult {
 		
-		@AutoPicklock
+		@Convert
 		InnerStaticException createInnerStatic();
 
 	}
@@ -108,4 +118,27 @@ public class ExampleObjectTest {
 	interface InnerStaticException {
 	}
 
+	interface UnlockedExampleWithConstructorConfig {
+
+		boolean useInnerStatic(@Convert InnerStaticWithoutStandardConstructor arg);
+
+	}
+
+	@Construct(InnerStaticConstructorConfig.class)
+	interface InnerStaticWithoutStandardConstructor {
+	}
+	
+	private static class InnerStaticConstructorConfig implements ConstructorConfig {
+
+		@Override
+		public Object[] arguments() {
+			return new Object[]{"injectedstate"};
+		}
+		
+		@Override
+		public Class<?>[] signature() {
+			return new Class<?>[]{String.class};
+		}
+		
+	}
 }
