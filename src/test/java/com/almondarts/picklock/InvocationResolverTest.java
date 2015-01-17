@@ -1,10 +1,13 @@
 package com.almondarts.picklock;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -89,36 +92,59 @@ public class InvocationResolverTest {
 
 	@Test
 	public void testFindMethod() throws Exception {
-		assertThat(resolver.findMethod("methoda", String.class, new Class[0], new Class[0]), notNullValue());
-		assertThat(resolver.findMethod("methodb", String.class, new Class[]{String.class}, new Class[0]), notNullValue());
-		assertThat(resolver.findMethod("methodc", String.class, new Class[]{String.class}, new Class[]{Exception.class}), notNullValue());
-		assertThat(resolver.findMethod("methodd", String.class, new Class[]{String.class}, new Class[]{Exception.class}), notNullValue());
-		assertThat(resolver.findMethod("methode", String.class, new Class[]{String.class}, new Class[]{Exception.class}), notNullValue());
+		Method[] methods = Methods.class.getDeclaredMethods();
+		assertThat(methods.length, equalTo(5));
+		assertThat(resolver.findMethod(methods[0]), notNullValue());
+		assertThat(resolver.findMethod(methods[1]), notNullValue());
+		assertThat(resolver.findMethod(methods[2]), notNullValue());
+		assertThat(resolver.findMethod(methods[3]), notNullValue());
+		assertThat(resolver.findMethod(methods[4]), notNullValue());
 	}
 
 	@Test(expected = NoSuchMethodException.class)
 	public void testFindMethodNonExisting() throws Exception {
-		assertThat(resolver.findMethod("methodz", String.class, new Class[0], new Class[0]), notNullValue());
+		Method[] badmethods = BadMethods.class.getDeclaredMethods();
+		resolver.findMethod(badmethods[0]);
 	}
 
 	@Test(expected = NoSuchMethodException.class)
 	public void testFindMethodWronglySignature() throws Exception {
-		assertThat(resolver.findMethod("methodb", String.class, new Class[0], new Class[0]), notNullValue());
+		Method[] badmethods = BadMethods.class.getDeclaredMethods();
+		resolver.findMethod(badmethods[1]);
 	}
 
 	@Test(expected = NoSuchMethodException.class)
 	public void testFindMethodWronglyTyped() throws Exception {
-		assertThat(resolver.findMethod("methodb", String.class, new Class[]{int.class}, new Class[0]), notNullValue());
+		Method[] badmethods = BadMethods.class.getDeclaredMethods();
+		resolver.findMethod(badmethods[2]);
 	}
 
 	@Test(expected = NoSuchMethodException.class)
 	public void testFindMethodWronglyExceptionTyped() throws Exception {
-		assertThat(resolver.findMethod("methodb", String.class, new Class[]{String.class}, new Class[]{Exception.class}), notNullValue());
+		Method[] badmethods = BadMethods.class.getDeclaredMethods();
+		resolver.findMethod(badmethods[3]);
 	}
 
 	@Test(expected = NoSuchMethodException.class)
 	public void testFindMethodWronglyExceptionTypedInSuperclass() throws Exception {
-		assertThat(resolver.findMethod("methode", String.class, new Class[]{String.class}, new Class[]{IOException.class}), notNullValue());
+		Method[] badmethods = BadMethods.class.getDeclaredMethods();
+		resolver.findMethod(badmethods[4]);
+	}
+	
+	interface Methods {
+		String methoda();
+		String methodb(String s);
+		String methodc(String s) throws Exception;
+		String methodd(String s) throws Exception;
+		String methode(String s) throws Exception;
+	}
+
+	interface BadMethods {
+		String methodz();
+		String methodb();
+		String methodb(int i);
+		String methodb(String s) throws Exception;
+		String methode(String s) throws IOException;
 	}
 
 	private static class TestClass {
