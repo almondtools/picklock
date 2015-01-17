@@ -45,49 +45,49 @@ public class InvocationResolverTest {
 
 	@Test
 	public void testFindSetter() throws Exception {
-		assertThat(resolver.findSetter("setS", String.class), notNullValue());
-		assertThat(resolver.findSetter("setI", int.class), notNullValue());
+		assertThat(resolver.findSetter("S", String.class), notNullValue());
+		assertThat(resolver.findSetter("I", int.class), notNullValue());
 	}
 
 	@Test(expected=NoSuchFieldException.class)
 	public void testFindSetterOnNonexistent() throws Exception {
-		resolver.findSetter("setX", String.class);
+		resolver.findSetter("X", String.class);
 	}
 
 	@Test(expected=NoSuchFieldException.class)
 	public void testFindSetterOnWronglyTyped() throws Exception {
-		resolver.findSetter("setS", int.class);
+		resolver.findSetter("S", int.class);
 	}
 
 	@Test
 	public void testFindGetter() throws Exception {
-		assertThat(resolver.findGetter("getS", String.class), notNullValue());
-		assertThat(resolver.findGetter("getI", int.class), notNullValue());
+		assertThat(resolver.findGetter("S", String.class), notNullValue());
+		assertThat(resolver.findGetter("I", int.class), notNullValue());
 	}
 
 	@Test(expected=NoSuchFieldException.class)
 	public void testFindGetterOnNonexistent() throws Exception {
-		resolver.findGetter("getX", String.class);
+		resolver.findGetter("X", String.class);
 	}
 
 	@Test(expected=NoSuchFieldException.class)
 	public void testFindGetterOnWronglyTyped() throws Exception {
-		resolver.findGetter("getS", int.class);
+		resolver.findGetter("S", int.class);
 	}
 
 	@Test
 	public void testFindIs() throws Exception {
-		assertThat(resolver.findIs("isB", boolean.class), notNullValue());
+		assertThat(resolver.findIs("B", boolean.class), notNullValue());
 	}
 
 	@Test(expected=NoSuchFieldException.class)
 	public void testFindIsOnNonexistent() throws Exception {
-		resolver.findIs("isX", boolean.class);
+		resolver.findIs("X", boolean.class);
 	}
 
 	@Test(expected=NoSuchFieldException.class)
 	public void testFindIsOnWronglyTyped() throws Exception {
-		resolver.findIs("isS", int.class);
+		resolver.findIs("S", int.class);
 	}
 
 	@Test

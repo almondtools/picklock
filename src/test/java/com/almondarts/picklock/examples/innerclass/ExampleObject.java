@@ -5,11 +5,21 @@ public class ExampleObject {
 
 	private String outerState;
 	
-	public ExampleObject()  {
+	private InnerStatic innerStatic;
+	
+	public ExampleObject(String outerState)  {
+		this.outerState = outerState;
 	}
 	
 	private InnerStatic createInnerStatic()  {
-		return new InnerStatic(outerState);
+		InnerStatic innerStatic = new InnerStatic();
+		innerStatic.setState(outerState);
+		return innerStatic;
+	}
+
+	private InnerStaticWithoutStandardConstructor createInnerStaticWithoutStandardContructor()  {
+		InnerStaticWithoutStandardConstructor innerStatic = new InnerStaticWithoutStandardConstructor(outerState);
+		return innerStatic;
 	}
 
 	private boolean useInnerStatic(InnerStatic arg)  {
@@ -23,7 +33,19 @@ public class ExampleObject {
 	private static class InnerStatic {
 		private String state;
 
-		public InnerStatic(String state) {
+		public InnerStatic() {
+		}
+		
+		public void setState(String state) {
+			this.state = state;
+		}
+		
+	}
+	
+	private static class InnerStaticWithoutStandardConstructor {
+		private String state;
+
+		public InnerStaticWithoutStandardConstructor(String state) {
 			this.state = state;
 		}
 		

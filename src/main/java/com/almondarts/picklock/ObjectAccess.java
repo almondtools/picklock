@@ -16,6 +16,10 @@ public class ObjectAccess extends InvocationResolver implements InvocationHandle
 		this.methods = new HashMap<Method, MethodInvocationHandler>();
 		this.object = object;
 	}
+	
+	public Object getObject() {
+		return object;
+	}
 
 	public static ObjectAccess unlock(Object object) {
 		return new ObjectAccess(object);

@@ -1,5 +1,9 @@
 package com.almondarts.picklock;
 
+import static com.almondarts.picklock.MethodClassification.isBooleanGetter;
+import static com.almondarts.picklock.MethodClassification.isGetter;
+import static com.almondarts.picklock.MethodClassification.isSetter;
+import static com.almondarts.picklock.MethodClassification.propertyOf;
 import static com.almondarts.picklock.SignatureUtil.computeFieldNames;
 import static com.almondarts.picklock.SignatureUtil.fieldSignature;
 import static com.almondarts.picklock.SignatureUtil.methodSignature;
@@ -14,10 +18,6 @@ import com.almondarts.picklock.examples.innerclass.AutoPicklock;
 
 public class InvocationResolver {
 
-	private static final String IS = "is";
-	private static final String GET = "get";
-	private static final String SET = "set";
-	
 	private Class<?> innerClass;
 
 	public InvocationResolver(Class<?> clazz) {
@@ -25,20 +25,16 @@ public class InvocationResolver {
 	}
 
 	protected MethodInvocationHandler findInvocationHandler(Method method) throws NoSuchMethodException {
-		String methodName = method.getName();
-		Class<?>[] parameterTypes = method.getParameterTypes();
-		Class<?>[] exceptionTypes = method.getExceptionTypes();
-		Class<?> returnType = method.getReturnType();
 		try {
 			return findMethod(method);
 		} catch (NoSuchMethodException e) {
 			try {
-				if (methodName.length() > 3 && methodName.startsWith(SET) && parameterTypes.length == 1 && exceptionTypes.length == 0) {
-					return findSetter(methodName, parameterTypes[0]);
-				} else if (methodName.length() > 3 && methodName.startsWith(GET) && parameterTypes.length == 0 && exceptionTypes.length == 0) {
-					return findGetter(methodName, returnType);
-				} else if (methodName.length() > 2 && methodName.startsWith(IS) && parameterTypes.length == 0 && exceptionTypes.length == 0 && (returnType == Boolean.class || returnType == boolean.class)) {
-					return findIs(methodName, returnType);
+				if (isSetter(method)) {
+					return findSetter(propertyOf(method), method.getParameterTypes()[0]);
+				} else if (isGetter(method)) {
+					return findGetter(propertyOf(method), method.getReturnType());
+				} else if (isBooleanGetter(method)) {
+					return findIs(propertyOf(method), method.getReturnType());
 				} else {
 					throw e;
 				}
@@ -48,18 +44,15 @@ public class InvocationResolver {
 		}
 	}
 
-	protected FieldSetter findSetter(String methodName, Class<?> type) throws NoSuchFieldException {
-		String fieldName = methodName.substring(3);
+	protected FieldSetter findSetter(String fieldName, Class<?> type) throws NoSuchFieldException {
 		return new FieldSetter(findField(fieldName, type));
 	}
 
-	protected FieldGetter findGetter(String methodName, Class<?> type) throws NoSuchFieldException {
-		String fieldName = methodName.substring(3);
+	protected FieldGetter findGetter(String fieldName, Class<?> type) throws NoSuchFieldException {
 		return new FieldGetter(findField(fieldName, type));
 	}
 
-	protected FieldGetter findIs(String methodName, Class<?> type) throws NoSuchFieldException {
-		String fieldName = methodName.substring(2);
+	protected FieldGetter findIs(String fieldName, Class<?> type) throws NoSuchFieldException {
 		return new FieldGetter(findField(fieldName, type));
 	}
 
@@ -83,14 +76,15 @@ public class InvocationResolver {
 		throw new NoSuchFieldException(fieldSignature(fieldNames, type));
 	}
 
-	protected MethodInvoker findMethod(Method method) throws NoSuchMethodException {
+	protected MethodInvocationHandler findMethod(Method method) throws NoSuchMethodException {
 		Class<?> currentClass = this.innerClass;
 		while (currentClass != Object.class) {
 			try {
 				if (isAutoPicklocked(method)) {
-					Method candidate = findPicklockedMethod(currentClass, method.getName(), method.getParameterTypes(), method.getParameterAnnotations());
+					String defaultName = containsAutopicklocked(method.getAnnotations(), method.getReturnType());
+					Method candidate = findPicklockedMethod(currentClass, method.getName(), method.getReturnType(), defaultName, method.getParameterTypes(), method.getParameterAnnotations());
 					if (Arrays.equals(method.getExceptionTypes(), candidate.getExceptionTypes())) {
-						return new MethodInvoker(candidate);
+						return new ConvertingMethodInvoker(candidate, method);
 					}
 				} else {
 					Method candidate = currentClass.getDeclaredMethod(method.getName(), method.getParameterTypes());
@@ -109,57 +103,69 @@ public class InvocationResolver {
 		if (method.getAnnotation(AutoPicklock.class) != null) {
 			return true;
 		}
-		for (Annotation[] annotations : method.getParameterAnnotations()) {
-			if (containsAutopicklocked(annotations)) {
+		Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+		Class<?>[] parameterTypes = method.getParameterTypes();
+		for (int i = 0; i < parameterTypes.length; i++) {
+			Class<?> parameterType = parameterTypes[i];
+			Annotation[] annotations = parameterAnnotations[i];
+			if (containsAutopicklocked(annotations, parameterType) != null) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private Method findPicklockedMethod(Class<?> currentClass, String name, Class<?>[] parameterTypes, Annotation[][] parameterAnnotations) throws NoSuchMethodException {
-		boolean[] convert = determineParamsToConvert(parameterAnnotations);
+	private Method findPicklockedMethod(Class<?> currentClass, String name, Class<?> resultType, String annotatedName, Class<?>[] parameterTypes, Annotation[][] parameterAnnotations) throws NoSuchMethodException {
+		String[] convert = determineParamsToConvert(parameterAnnotations, parameterTypes);
 		for (Method candidate : currentClass.getDeclaredMethods()) {
-			if (matchesSignature(candidate, name, parameterTypes, convert)) {
+			if (matchesSignature(candidate, name, resultType, annotatedName, parameterTypes, convert)) {
 				return candidate;
 			}
 		}
 		throw new NoSuchMethodException();
 	}
 
-	private boolean matchesSignature(Method candidate, String name, Class<?>[] parameterTypes, boolean[] convert) {
+	private boolean matchesSignature(Method candidate, String name, Class<?> resultType, String annotatedName, Class<?>[] parameterTypes, String[] convert) {
 		if (!candidate.getName().equals(name)) {
 			return false;
 		}
 		Class<?>[] candidateParameters = candidate.getParameterTypes();
 		for (int i = 0; i < candidateParameters.length; i++) {
-			Class<?> candidateParameter = candidateParameters[i];
-			Class<?> requiredParameter = parameterTypes[i];
-			if (candidateParameter.equals(requiredParameter))  {
+			Class<?> candidateType = candidateParameters[i];
+			Class<?> requiredType = parameterTypes[i];
+			if (isCompliant(requiredType, candidateType, convert[i])) {
 				continue;
 			}
-			if (convert[i] && candidateParameter.getSimpleName().equals(requiredParameter.getSimpleName())) {
-				continue;
-			}
+			return false;
 		}
-		return true;
+		return isCompliant(resultType, candidate.getReturnType(), annotatedName) ;
 	}
 
-	private boolean[] determineParamsToConvert(Annotation[][] parameterAnnotations) {
-		boolean[] convert = new boolean[parameterAnnotations.length];
+	private boolean isCompliant(Class<?> requiredType, Class<?> candidateType, String annotatedName) {
+		return candidateType.equals(requiredType) || candidateType.getSimpleName().equals(annotatedName);
+	}
+
+	private String[] determineParamsToConvert(Annotation[][] parameterAnnotations, Class<?>[] parameterTypes) {
+		String[] convert = new String[parameterAnnotations.length];
 		for (int i = 0; i < parameterAnnotations.length; i++) {
-			convert[i] = containsAutopicklocked(parameterAnnotations[i]);
+			convert[i] = containsAutopicklocked(parameterAnnotations[i], parameterTypes[i]);
 		}
 		return convert;
 	}
 
-	private boolean containsAutopicklocked(Annotation[] annotations) {
+	private String containsAutopicklocked(Annotation[] annotations, Class<?> defaultType) {
 		for (Annotation annotation : annotations) {
 			if (annotation.annotationType() == AutoPicklock.class) {
-				return true;
+				AutoPicklock autoPicklock = (AutoPicklock) annotation;
+				String name = autoPicklock.value();
+				if (name.isEmpty()) {
+					return defaultType.getSimpleName();
+				} else {
+					return name;
+				}
 			}
 		}
-		return false;
+		return null;
 	}
 
 }
