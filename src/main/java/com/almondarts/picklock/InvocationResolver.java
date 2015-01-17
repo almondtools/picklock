@@ -1,9 +1,9 @@
 package com.almondarts.picklock;
 
-import static com.almondarts.picklock.MethodClassification.isBooleanGetter;
-import static com.almondarts.picklock.MethodClassification.isGetter;
-import static com.almondarts.picklock.MethodClassification.isSetter;
-import static com.almondarts.picklock.MethodClassification.propertyOf;
+import static com.almondarts.picklock.SignatureUtil.isBooleanGetter;
+import static com.almondarts.picklock.SignatureUtil.isGetter;
+import static com.almondarts.picklock.SignatureUtil.isSetter;
+import static com.almondarts.picklock.SignatureUtil.propertyOf;
 import static com.almondarts.picklock.SignatureUtil.computeFieldNames;
 import static com.almondarts.picklock.SignatureUtil.fieldSignature;
 import static com.almondarts.picklock.SignatureUtil.methodSignature;
@@ -122,6 +122,9 @@ public class InvocationResolver {
 			return false;
 		}
 		Class<?>[] candidateParameters = candidate.getParameterTypes();
+		if (candidateParameters.length != parameterTypes.length) {
+			return false;
+		}
 		for (int i = 0; i < candidateParameters.length; i++) {
 			Class<?> candidateType = candidateParameters[i];
 			Class<?> requiredType = parameterTypes[i];

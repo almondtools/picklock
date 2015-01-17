@@ -1,8 +1,9 @@
 package com.almondarts.picklock;
 
-import static com.almondarts.picklock.MethodClassification.isBooleanGetter;
-import static com.almondarts.picklock.MethodClassification.isGetter;
-import static com.almondarts.picklock.MethodClassification.isSetter;
+import static com.almondarts.picklock.SignatureUtil.isBooleanGetter;
+import static com.almondarts.picklock.SignatureUtil.isGetter;
+import static com.almondarts.picklock.SignatureUtil.isSetter;
+import static com.almondarts.picklock.SignatureUtil.propertyOf;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
@@ -36,7 +37,7 @@ public class ConvertingMethodInvoker implements MethodInvocationHandler {
 		}
 	}
 
-	private Object[] convertArguments(Object[] args) throws InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException, SecurityException {
+	protected Object[] convertArguments(Object... args) throws InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException, SecurityException {
 		if (args == null) {
 			args = new Object[0];
 		}
@@ -101,7 +102,7 @@ public class ConvertingMethodInvoker implements MethodInvocationHandler {
 		return converter.getReadWritablePropertyPairs();
 	}
 
-	private Object convertResult(Object result) throws NoSuchMethodException {
+	protected Object convertResult(Object result) throws NoSuchMethodException {
 		Class<?> targetType = target.getReturnType();
 		Class<?> methodType = method.getReturnType();
 		if (targetType.equals(methodType)) {
@@ -133,7 +134,7 @@ public class ConvertingMethodInvoker implements MethodInvocationHandler {
 		}
 
 		private Method[] fetchMethods(Method method) {
-			String name = MethodClassification.propertyOf(method);
+			String name = propertyOf(method);
 			Method[] methods = properties.get(name);
 			if (methods == null) {
 				methods = new Method[2];

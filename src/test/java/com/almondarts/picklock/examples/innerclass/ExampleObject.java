@@ -22,7 +22,7 @@ public class ExampleObject {
 		return innerStatic;
 	}
 
-	private boolean useInnerStatic(InnerStatic arg)  {
+	private boolean useInnerStatic(InnerStatic arg, String s)  {
 		return arg.state != null;
 	}
 
@@ -35,6 +35,8 @@ public class ExampleObject {
 	}
 
 	private static class InnerStatic {
+		
+		private boolean booleanState;
 		private String state;
 
 		public InnerStatic() {

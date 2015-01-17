@@ -19,6 +19,7 @@ public class ExampleObjectTest {
 		UnlockedExampleObject unlockedExampleObject = ObjectAccess.unlock(exampleObject).features(UnlockedExampleObject.class);
 		InnerStatic s = unlockedExampleObject.createInnerStatic();
 		assertThat(s.getState(), equalTo("state"));
+		assertThat(s.isBooleanState(), is(false));
 	}
 
 	@Test
@@ -28,6 +29,11 @@ public class ExampleObjectTest {
 		assertThat(unlockedExampleObject.useInnerStatic(new InnerStatic() {
 
 			@Override
+			public boolean isBooleanState() {
+				return false;
+			}
+			
+			@Override
 			public String getState() {
 				return null;
 			}
@@ -35,9 +41,14 @@ public class ExampleObjectTest {
 			@Override
 			public void setState(String state) {
 			}
-		}), is(false));
+		},""), is(false));
 		assertThat(unlockedExampleObject.useInnerStatic(new InnerStatic() {
 
+			@Override
+			public boolean isBooleanState() {
+				return false;
+			}
+			
 			@Override
 			public String getState() {
 				return "state";
@@ -46,7 +57,7 @@ public class ExampleObjectTest {
 			@Override
 			public void setState(String state) {
 			}
-		}), is(true));
+		},""), is(true));
 	}
 
 	@Test(expected=NoSuchMethodException.class)
@@ -66,7 +77,7 @@ public class ExampleObjectTest {
 		ExampleObject exampleObject = new ExampleObject("state");
 		UnlockedExampleOther unlockedExampleObject = ObjectAccess.unlock(exampleObject).features(UnlockedExampleOther.class);
 		InnerStaticOther s = unlockedExampleObject.createInnerStatic();
-		assertThat(unlockedExampleObject.useInnerStatic(s), is(true));
+		assertThat(unlockedExampleObject.useInnerStatic(s, ""), is(true));
 	}
 
 	@Test
@@ -81,11 +92,13 @@ public class ExampleObjectTest {
 		@Convert
 		InnerStatic createInnerStatic();
 
-		boolean useInnerStatic(@Convert InnerStatic arg);
+		boolean useInnerStatic(@Convert InnerStatic arg, String s);
 
 	}
 
 	interface InnerStatic {
+		boolean isBooleanState();
+		
 		String getState();
 
 		void setState(String state);
@@ -95,7 +108,7 @@ public class ExampleObjectTest {
 		@Convert("InnerStatic")
 		InnerStaticOther createInnerStatic();
 
-		boolean useInnerStatic(@Convert("InnerStatic") InnerStaticOther arg);
+		boolean useInnerStatic(@Convert("InnerStatic") InnerStaticOther arg, String s);
 
 	}
 
