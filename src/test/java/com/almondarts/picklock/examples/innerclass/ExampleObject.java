@@ -5,10 +5,12 @@ public class ExampleObject {
 
 	private String outerState;
 	
-	private InnerStatic innerStatic;
+	private InnerStatic fieldInnerStatic;
 	
 	public ExampleObject(String outerState)  {
 		this.outerState = outerState;
+		this.fieldInnerStatic = new InnerStatic();
+		fieldInnerStatic.setState(outerState);
 	}
 	
 	private InnerStatic createInnerStatic()  {

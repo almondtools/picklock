@@ -88,12 +88,51 @@ public class ExampleObjectTest {
 		}), is(true));
 	}
 
+	@Test
+	public void testInnerStaticGetter() throws Exception {
+		ExampleObject exampleObject = new ExampleObject("stateForGetter");
+		UnlockedExampleGetSetter unlockedExampleObject = ObjectAccess.unlock(exampleObject).features(UnlockedExampleGetSetter.class);
+		assertThat(unlockedExampleObject.getFieldInnerStatic().getState(), equalTo("stateForGetter"));
+	}
+
+	@Test
+	public void testInnerStaticSetter() throws Exception {
+		ExampleObject exampleObject = new ExampleObject("stateForSetter");
+		UnlockedExampleGetSetter unlockedExampleObject = ObjectAccess.unlock(exampleObject).features(UnlockedExampleGetSetter.class);
+		unlockedExampleObject.setFieldInnerStatic(new InnerStatic() {
+
+			@Override
+			public boolean isBooleanState() {
+				return false;
+			}
+
+			@Override
+			public String getState() {
+				return "newState";
+			}
+
+			@Override
+			public void setState(String state) {
+			}
+			
+		});
+		assertThat(unlockedExampleObject.getFieldInnerStatic().getState(), equalTo("newState"));
+	}
+
 	interface UnlockedExampleObject {
 		@Convert
 		InnerStatic createInnerStatic();
 
 		boolean useInnerStatic(@Convert InnerStatic arg, String s);
 
+	}
+
+	interface UnlockedExampleGetSetter {
+		
+		@Convert
+		InnerStatic getFieldInnerStatic();
+
+		void setFieldInnerStatic(@Convert InnerStatic field);
 	}
 
 	interface InnerStatic {

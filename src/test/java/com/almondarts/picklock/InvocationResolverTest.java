@@ -5,9 +5,9 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-import org.junit.Before;
 import org.junit.Test;
 
 @SuppressWarnings("unused")
@@ -16,9 +16,9 @@ public class InvocationResolverTest {
 	@Test
 	public void testFindField() throws Exception {
 		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
-		assertThat(resolver.findField("b", boolean.class), notNullValue());
-		assertThat(resolver.findField("s", String.class), notNullValue());
-		assertThat(resolver.findField("i", int.class), notNullValue());
+		assertThat(resolver.findField("b", boolean.class, new Annotation[0]), notNullValue());
+		assertThat(resolver.findField("s", String.class, new Annotation[0]), notNullValue());
+		assertThat(resolver.findField("i", int.class, new Annotation[0]), notNullValue());
 	}
 
 	@Test
@@ -42,19 +42,19 @@ public class InvocationResolverTest {
 	@Test(expected = NoSuchFieldException.class)
 	public void testFindFieldNonExisting() throws Exception {
 		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
-		assertThat(resolver.findField("a", boolean.class), notNullValue());
+		assertThat(resolver.findField("a", boolean.class, new Annotation[0]), notNullValue());
 	}
 
 	@Test(expected = NoSuchFieldException.class)
 	public void testFindSuperFieldWronglyTyped() throws Exception {
 		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
-		assertThat(resolver.findField("s", boolean.class), notNullValue());
+		assertThat(resolver.findField("s", boolean.class, new Annotation[0]), notNullValue());
 	}
 
 	@Test(expected = NoSuchFieldException.class)
 	public void testFindFieldWronglyTyped() throws Exception {
 		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
-		assertThat(resolver.findField("b", String.class), notNullValue());
+		assertThat(resolver.findField("b", String.class, new Annotation[0]), notNullValue());
 	}
 
 	@Test

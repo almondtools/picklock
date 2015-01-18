@@ -40,24 +40,35 @@ public class InvocationResolver {
 	}
 
 	protected MethodInvocationHandler createSetterInvocator(Method method) throws NoSuchFieldException {
-		return new FieldSetter(findField(propertyOf(method), method.getParameterTypes()[0]));
+		if (isConverted(method)) {
+			return new ConvertingFieldSetter(findField(propertyOf(method), method.getParameterTypes()[0], method.getParameterAnnotations()[0]), method.getParameterTypes()[0]);
+		} else {
+			return new FieldSetter(findField(propertyOf(method), method.getParameterTypes()[0], new Annotation[0]));
+		}
 	}
 
 	protected MethodInvocationHandler createGetterInvocator(Method method) throws NoSuchFieldException {
-		return new FieldGetter(findField(propertyOf(method), method.getReturnType()));
+		if (isConverted(method)) {
+			return new ConvertingFieldGetter(findField(propertyOf(method), method.getReturnType(), method.getAnnotations()), method.getReturnType());
+		} else {
+			return new FieldGetter(findField(propertyOf(method), method.getReturnType(), new Annotation[0]));
+		}
 	}
 
-	protected Field findField(String fieldPattern, Class<?> type) throws NoSuchFieldException {
+	protected Field findField(String fieldPattern, Class<?> type, Annotation[] annotations) throws NoSuchFieldException {
+		String convert = containsConvertable(annotations, type);
 		List<String> fieldNames = computeFieldNames(fieldPattern);
 		Class<?> currentClass = this.innerClass;
 		while (currentClass != Object.class) {
 			for (String fieldName : fieldNames) {
 				try {
 					Field field = currentClass.getDeclaredField(fieldName);
-					if (field.getType() != type) {
-						throw new NoSuchFieldException();
-					} else {
+					if (field.getType() == type) {
 						return field;
+					} else if (field.getType().getSimpleName().equals(convert)) {
+						return field;
+					} else {
+						throw new NoSuchFieldException();
 					}
 				} catch (NoSuchFieldException e) {
 				}
