@@ -37,9 +37,18 @@ public class StaticSetterTest {
 
 	@Test
 	public void testSetStaticFinalField() throws Throwable {
-		Object result = new StaticSetter(WithField.class, WithStaticFinalField.class.getDeclaredField("FIELD")).invoke(new Object[] { "hello" });
+		Object result = new StaticSetter(WithField.class, WithStaticFinalField.class.getDeclaredField("RUNTIME")).invoke(new Object[] { "hello" });
 		assertThat(result, nullValue());
-		assertThat(WithStaticFinalField.FIELD, equalTo("hello"));
+		assertThat(WithStaticFinalField.RUNTIME, equalTo("hello"));
+	}
+
+	@Test
+	public void testSetStaticFinalFieldCompileTime() throws Throwable {
+		Object voidresult = new StaticSetter(WithField.class, WithStaticFinalField.class.getDeclaredField("COMPILETIME")).invoke(new Object[] { "hello" });
+		assertThat(voidresult, nullValue());
+		assertThat(WithStaticFinalField.COMPILETIME, equalTo("ABC"));// paradox in source code, effect of inlining (see byte code of this line)
+		Object result = new StaticGetter(WithField.class, WithStaticFinalField.class.getDeclaredField("COMPILETIME")).invoke(new Object[0]);
+		assertThat(result, equalTo((Object) "hello"));
 	}
 
 	private static class WithField {
@@ -49,6 +58,7 @@ public class StaticSetterTest {
 
 	private static class WithStaticFinalField {
 
-		static final String FIELD = "ABC".toString();
+		static final String RUNTIME = "ABC".toString();
+		static final String COMPILETIME = "ABC";
 	}
 }

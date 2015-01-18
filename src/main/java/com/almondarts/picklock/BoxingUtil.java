@@ -7,28 +7,26 @@ public final class BoxingUtil {
 	public static Class<?> getBoxed(Class<?> type) {
 		if (!type.isPrimitive()) {
 			return type;
+		} else if (Byte.TYPE.equals(type)) {
+			return Byte.class;
+		} else if (Character.TYPE.equals(type)) {
+			return Character.class;
+		} else if (Short.TYPE.equals(type)) {
+			return Short.class;
+		} else if (Integer.TYPE.equals(type)) {
+			return Integer.class;
+		} else if (Long.TYPE.equals(type)) {
+			return Long.class;
+		} else if (Float.TYPE.equals(type)) {
+			return Float.class;
+		} else if (Double.TYPE.equals(type)) {
+			return Double.class;
+		} else if (Boolean.TYPE.equals(type)) {
+			return Boolean.class;
+		} else if (Void.TYPE.equals(type)) {
+			return Void.class;
 		} else {
-			if (Byte.TYPE.equals(type)) {
-				return Byte.class;
-			} else if (Character.TYPE.equals(type)) {
-				return Character.class;
-			} else if (Short.TYPE.equals(type)) {
-				return Short.class;
-			} else if (Integer.TYPE.equals(type)) {
-				return Integer.class;
-			} else if (Long.TYPE.equals(type)) {
-				return Long.class;
-			} else if (Float.TYPE.equals(type)) {
-				return Float.class;
-			} else if (Double.TYPE.equals(type)) {
-				return Double.class;
-			} else if (Boolean.TYPE.equals(type)) {
-				return Boolean.class;
-			} else if (Void.TYPE.equals(type)) {
-				return Void.class;
-			} else {
-				return Object.class;
-			}
+			return Object.class;
 		}
 	}
 

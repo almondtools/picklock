@@ -1,17 +1,16 @@
 package com.almondarts.picklock;
 
+import static com.almondarts.picklock.SignatureUtil.computeFieldNames;
+import static com.almondarts.picklock.SignatureUtil.fieldSignature;
 import static com.almondarts.picklock.SignatureUtil.isBooleanGetter;
 import static com.almondarts.picklock.SignatureUtil.isGetter;
 import static com.almondarts.picklock.SignatureUtil.isSetter;
-import static com.almondarts.picklock.SignatureUtil.propertyOf;
-import static com.almondarts.picklock.SignatureUtil.computeFieldNames;
-import static com.almondarts.picklock.SignatureUtil.fieldSignature;
 import static com.almondarts.picklock.SignatureUtil.methodSignature;
+import static com.almondarts.picklock.SignatureUtil.propertyOf;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.List;
 
 public class InvocationResolver {
@@ -40,11 +39,11 @@ public class InvocationResolver {
 		}
 	}
 
-	private MethodInvocationHandler createSetterInvocator(Method method) throws NoSuchFieldException {
+	protected MethodInvocationHandler createSetterInvocator(Method method) throws NoSuchFieldException {
 		return new FieldSetter(findField(propertyOf(method), method.getParameterTypes()[0]));
 	}
 
-	private MethodInvocationHandler createGetterInvocator(Method method) throws NoSuchFieldException {
+	protected MethodInvocationHandler createGetterInvocator(Method method) throws NoSuchFieldException {
 		return new FieldGetter(findField(propertyOf(method), method.getReturnType()));
 	}
 
@@ -72,17 +71,12 @@ public class InvocationResolver {
 		Class<?> currentClass = this.innerClass;
 		while (currentClass != Object.class) {
 			try {
-				if (isAutoPicklocked(method)) {
-					String defaultName = containsConvertable(method.getAnnotations(), method.getReturnType());
-					Method candidate = findConvertableMethod(currentClass, method.getName(), method.getReturnType(), defaultName, method.getParameterTypes(), method.getParameterAnnotations());
-					if (Arrays.equals(method.getExceptionTypes(), candidate.getExceptionTypes())) {
-						return new ConvertingMethodInvoker(candidate, method);
-					}
+				if (isConverted(method)) {
+					Method candidate = findConvertableMethod(method, currentClass);
+					return new ConvertingMethodInvoker(candidate, method);
 				} else {
 					Method candidate = findMatchingMethod(method, currentClass);
-					if (Arrays.equals(method.getExceptionTypes(), candidate.getExceptionTypes())) {
-						return new MethodInvoker(candidate);
-					}
+					return new MethodInvoker(candidate);
 				}
 			} catch (NoSuchMethodException e) {
 			}
@@ -91,7 +85,7 @@ public class InvocationResolver {
 		throw new NoSuchMethodException(methodSignature(method.getName(), method.getReturnType(), method.getParameterTypes(), method.getExceptionTypes()));
 	}
 
-	private boolean isAutoPicklocked(Method method) {
+	private boolean isConverted(Method method) {
 		if (method.getAnnotation(Convert.class) != null) {
 			return true;
 		}
@@ -107,36 +101,49 @@ public class InvocationResolver {
 		return false;
 	}
 
-	private Method findMatchingMethod(Method method, Class<?> currentClass) throws NoSuchMethodException {
-		return currentClass.getDeclaredMethod(method.getName(), method.getParameterTypes());
-	}
-
-	private Method findConvertableMethod(Class<?> currentClass, String name, Class<?> resultType, String convertResult, Class<?>[] parameterTypes, Annotation[][] parameterAnnotations) throws NoSuchMethodException {
-		String[] conversionVector = determineNeededConversions(parameterAnnotations, parameterTypes);
+	private Method findConvertableMethod(Method method, Class<?> currentClass) throws NoSuchMethodException {
+		String[] conversionVector = determineNeededConversions(method.getParameterAnnotations(), method.getParameterTypes());
 		for (Method candidate : currentClass.getDeclaredMethods()) {
-			if (matchesSignature(candidate, name, resultType, convertResult, parameterTypes, conversionVector)) {
+			String containsConvertable = containsConvertable(method.getAnnotations(), method.getReturnType());
+			if (matchesSignature(method, candidate, conversionVector, containsConvertable)) {
 				return candidate;
 			}
 		}
 		throw new NoSuchMethodException();
 	}
 
-	private boolean matchesSignature(Method candidate, String name, Class<?> resultType, String convertResult, Class<?>[] parameterTypes, String[] convertArguments) {
-		if (!candidate.getName().equals(name)) {
+	private Method findMatchingMethod(Method method, Class<?> currentClass) throws NoSuchMethodException {
+		Method candidate = currentClass.getDeclaredMethod(method.getName(), method.getParameterTypes());
+		if (matchesSignature(candidate, method, null, null)) {
+			return candidate;
+		}
+		throw new NoSuchMethodException();
+	}
+
+	private boolean matchesSignature(Method method, Method candidate, String[] convertArguments, String convertResult) {
+		if (!candidate.getName().equals(method.getName())) {
 			return false;
 		}
-		Class<?>[] candidateParameters = candidate.getParameterTypes();
-		if (candidateParameters.length != parameterTypes.length) {
+		return isCompliant(method.getParameterTypes(), candidate.getParameterTypes(), convertArguments)
+			&& isCompliant(method.getReturnType(), candidate.getReturnType(), convertResult)
+			&& isCompliant(method.getExceptionTypes(), candidate.getExceptionTypes(), null);
+	}
+
+	private boolean isCompliant(Class<?>[] requiredTypes, Class<?>[] candidateTypes, String[] annotatedNames) {
+		if (candidateTypes.length != requiredTypes.length) {
 			return false;
 		}
-		for (int i = 0; i < candidateParameters.length; i++) {
-			Class<?> candidateType = candidateParameters[i];
-			Class<?> requiredType = parameterTypes[i];
-			if (!isCompliant(requiredType, candidateType, convertArguments[i])) {
+		if (annotatedNames == null) {
+			annotatedNames = new String[requiredTypes.length];
+		}
+		for (int i = 0; i < candidateTypes.length; i++) {
+			Class<?> candidateType = candidateTypes[i];
+			Class<?> requiredType = requiredTypes[i];
+			if (!isCompliant(requiredType, candidateType, annotatedNames[i])) {
 				return false;
 			}
 		}
-		return isCompliant(resultType, candidate.getReturnType(), convertResult) ;
+		return true;
 	}
 
 	private boolean isCompliant(Class<?> requiredType, Class<?> candidateType, String annotatedName) {
