@@ -49,7 +49,7 @@ The classic way to access the house would be reflection:
 		Method open = houseClass.getDeclaredMethod("open", new Class<?>[0]); // method lookup, type signature wrapping
 		open.setAccessible(true); // access enabling
 		open.invoke(house,new Object[0]); // non object oriented call, argument wrapping
-		return listFurniture();
+		return house.listFurniture();
 	}
 ```
 
