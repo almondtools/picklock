@@ -7,6 +7,7 @@
 	<artifactId>picklock</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>${project.groupId}:${project.artifactId}</name>
+	<description>An application to get controlled  access to private members of Java classes</description>
 	<url>https://github.com/almondtools/picklock</url>
 	<licenses>
 		<license>
@@ -99,5 +100,4 @@
 			</plugin>
 		</plugins>
 	</build>
-	<description>An application to get controlled  access to private members of Java classes, easier and more robust than the java native reflection api.</description>
 </project>
