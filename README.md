@@ -254,8 +254,6 @@ Picklock attempts will probably never fail at compile time, but some coding disc
 
 Now why should we use this?
 ===========================
-Critics may mention that Picklock lets you work around bad code. But we all know that it is better to write code in a good wayrather than finding methods to work around it. **Yes and No!**
-
 I see some scenarios of application:
 
 1. Sometimes we have to come up with foreign code that we cannot easily change. Perhaps it was not designed for TDD or dependency injection. In this case we have to access private members, and we can do this with picklock. The alternative would be to patch the code with getters and setters, which is not very rewarding.
