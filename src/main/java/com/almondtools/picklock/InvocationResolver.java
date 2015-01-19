@@ -1,10 +1,12 @@
 package com.almondtools.picklock;
 
 import static com.almondtools.picklock.SignatureUtil.computeFieldNames;
+import static com.almondtools.picklock.SignatureUtil.containsConvertable;
 import static com.almondtools.picklock.SignatureUtil.fieldSignature;
 import static com.almondtools.picklock.SignatureUtil.isBooleanGetter;
 import static com.almondtools.picklock.SignatureUtil.isGetter;
 import static com.almondtools.picklock.SignatureUtil.isSetter;
+import static com.almondtools.picklock.SignatureUtil.matchesSignature;
 import static com.almondtools.picklock.SignatureUtil.methodSignature;
 import static com.almondtools.picklock.SignatureUtil.propertyOf;
 
@@ -123,42 +125,12 @@ public class InvocationResolver {
 		throw new NoSuchMethodException();
 	}
 
-	private Method findMatchingMethod(Method method, Class<?> currentClass) throws NoSuchMethodException {
-		Method candidate = currentClass.getDeclaredMethod(method.getName(), method.getParameterTypes());
-		if (matchesSignature(candidate, method, null, null)) {
+	private Method findMatchingMethod(Method method, Class<?> clazz) throws NoSuchMethodException {
+		Method candidate = clazz.getDeclaredMethod(method.getName(), method.getParameterTypes());
+		if (matchesSignature(method, candidate, null, null)) {
 			return candidate;
 		}
 		throw new NoSuchMethodException();
-	}
-
-	private boolean matchesSignature(Method method, Method candidate, String[] convertArguments, String convertResult) {
-		if (!candidate.getName().equals(method.getName())) {
-			return false;
-		}
-		return isCompliant(method.getParameterTypes(), candidate.getParameterTypes(), convertArguments)
-			&& isCompliant(method.getReturnType(), candidate.getReturnType(), convertResult)
-			&& isCompliant(method.getExceptionTypes(), candidate.getExceptionTypes(), null);
-	}
-
-	private boolean isCompliant(Class<?>[] requiredTypes, Class<?>[] candidateTypes, String[] annotatedNames) {
-		if (candidateTypes.length != requiredTypes.length) {
-			return false;
-		}
-		if (annotatedNames == null) {
-			annotatedNames = new String[requiredTypes.length];
-		}
-		for (int i = 0; i < candidateTypes.length; i++) {
-			Class<?> candidateType = candidateTypes[i];
-			Class<?> requiredType = requiredTypes[i];
-			if (!isCompliant(requiredType, candidateType, annotatedNames[i])) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private boolean isCompliant(Class<?> requiredType, Class<?> candidateType, String annotatedName) {
-		return candidateType.equals(requiredType) || candidateType.getSimpleName().equals(annotatedName);
 	}
 
 	private String[] determineNeededConversions(Annotation[][] parameterAnnotations, Class<?>[] parameterTypes) {
@@ -167,21 +139,6 @@ public class InvocationResolver {
 			convert[i] = containsConvertable(parameterAnnotations[i], parameterTypes[i]);
 		}
 		return convert;
-	}
-
-	private String containsConvertable(Annotation[] annotations, Class<?> defaultType) {
-		for (Annotation annotation : annotations) {
-			if (annotation.annotationType() == Convert.class) {
-				Convert convertable = (Convert) annotation;
-				String name = convertable.value();
-				if (name.isEmpty()) {
-					return defaultType.getSimpleName();
-				} else {
-					return name;
-				}
-			}
-		}
-		return null;
 	}
 
 }

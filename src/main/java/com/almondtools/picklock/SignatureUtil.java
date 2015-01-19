@@ -2,6 +2,8 @@ package com.almondtools.picklock;
 
 import static com.almondtools.picklock.BoxingUtil.getUnboxed;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -9,11 +11,17 @@ import java.util.List;
 
 public final class SignatureUtil {
 
+	private static final String CONSTRUCTOR = "create";
 	private static final String IS = "is";
 	private static final String GET = "get";
 	private static final String SET = "set";
-	
+
 	private SignatureUtil() {
+	}
+
+	public static boolean isConstructor(Method method) {
+		String name = method.getName();
+		return name.equals(CONSTRUCTOR);
 	}
 
 	public static boolean isBooleanGetter(Method method) {
@@ -21,10 +29,10 @@ public final class SignatureUtil {
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		Class<?>[] exceptionTypes = method.getExceptionTypes();
 		Class<?> returnType = getUnboxed(method.getReturnType());
-		return name.length() > 2 
-			&& name.startsWith(IS) 
-			&& parameterTypes.length ==0 
-			&& exceptionTypes.length == 0 
+		return name.length() > 2
+			&& name.startsWith(IS)
+			&& parameterTypes.length == 0
+			&& exceptionTypes.length == 0
 			&& returnType == boolean.class;
 	}
 
@@ -33,10 +41,10 @@ public final class SignatureUtil {
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		Class<?>[] exceptionTypes = method.getExceptionTypes();
 		Class<?> returnType = getUnboxed(method.getReturnType());
-		return name.length() > 3 
-			&& name.startsWith(GET) 
-			&& parameterTypes.length == 0 
-			&& exceptionTypes.length == 0 
+		return name.length() > 3
+			&& name.startsWith(GET)
+			&& parameterTypes.length == 0
+			&& exceptionTypes.length == 0
 			&& returnType != void.class;
 	}
 
@@ -45,9 +53,9 @@ public final class SignatureUtil {
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		Class<?>[] exceptionTypes = method.getExceptionTypes();
 		Class<?> returnType = getUnboxed(method.getReturnType());
-		return name.length() > 3 
-			&& name.startsWith(SET) 
-			&& parameterTypes.length == 1 
+		return name.length() > 3
+			&& name.startsWith(SET)
+			&& parameterTypes.length == 1
 			&& exceptionTypes.length == 0
 			&& returnType == void.class;
 	}
@@ -77,13 +85,13 @@ public final class SignatureUtil {
 
 	public static String fieldSignature(List<String> fieldNames, Class<?> type) {
 		StringBuilder buffer = new StringBuilder()
-		.append(typeName(type))
-		.append(' ');
+			.append(typeName(type))
+			.append(' ');
 		Iterator<String> iterator = fieldNames.iterator();
 		if (iterator.hasNext()) {
 			buffer.append(iterator.next());
 		}
-		while(iterator.hasNext()) {
+		while (iterator.hasNext()) {
 			buffer.append('|');
 			buffer.append(iterator.next());
 		}
@@ -128,4 +136,58 @@ public final class SignatureUtil {
 	private static String typeName(Class<?> clazz) {
 		return clazz.getSimpleName();
 	}
+
+	public static boolean matchesSignature(Method method, Method candidate, String[] convertArguments, String convertResult) {
+		if (!candidate.getName().equals(method.getName())) {
+			return false;
+		}
+		return isCompliant(method.getParameterTypes(), candidate.getParameterTypes(), convertArguments)
+			&& isCompliant(method.getReturnType(), candidate.getReturnType(), convertResult)
+			&& isCompliant(method.getExceptionTypes(), candidate.getExceptionTypes(), null);
+	}
+
+	public static boolean matchesSignature(Method method, Constructor<?> candidate, String[] convertArguments, String convertResult) {
+		if (!method.getName().equals(CONSTRUCTOR)) {
+			return false;
+		}
+		return isCompliant(method.getParameterTypes(), candidate.getParameterTypes(), convertArguments)
+			&& isCompliant(method.getExceptionTypes(), candidate.getExceptionTypes(), null);
+	}
+
+	private static boolean isCompliant(Class<?>[] requiredTypes, Class<?>[] candidateTypes, String[] annotatedNames) {
+		if (candidateTypes.length != requiredTypes.length) {
+			return false;
+		}
+		if (annotatedNames == null) {
+			annotatedNames = new String[requiredTypes.length];
+		}
+		for (int i = 0; i < candidateTypes.length; i++) {
+			Class<?> candidateType = candidateTypes[i];
+			Class<?> requiredType = requiredTypes[i];
+			if (!isCompliant(requiredType, candidateType, annotatedNames[i])) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static boolean isCompliant(Class<?> requiredType, Class<?> candidateType, String annotatedName) {
+		return candidateType.equals(requiredType) || candidateType.getSimpleName().equals(annotatedName);
+	}
+
+	public static String containsConvertable(Annotation[] annotations, Class<?> defaultType) {
+		for (Annotation annotation : annotations) {
+			if (annotation.annotationType() == Convert.class) {
+				Convert convertable = (Convert) annotation;
+				String name = convertable.value();
+				if (name.isEmpty()) {
+					return defaultType.getSimpleName();
+				} else {
+					return name;
+				}
+			}
+		}
+		return null;
+	}
+
 }

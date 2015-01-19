@@ -1,8 +1,16 @@
 package com.almondtools.picklock;
 
+import static com.almondtools.picklock.SignatureUtil.containsConvertable;
 import static com.almondtools.picklock.SignatureUtil.fieldSignature;
+import static com.almondtools.picklock.SignatureUtil.isBooleanGetter;
+import static com.almondtools.picklock.SignatureUtil.isConstructor;
+import static com.almondtools.picklock.SignatureUtil.isGetter;
+import static com.almondtools.picklock.SignatureUtil.isSetter;
+import static com.almondtools.picklock.SignatureUtil.matchesSignature;
 import static com.almondtools.picklock.SignatureUtil.methodSignature;
+import static com.almondtools.picklock.SignatureUtil.propertyOf;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -11,10 +19,6 @@ import java.util.List;
 
 public class StaticInvocationResolver {
 
-	private static final String GET = "get";
-	private static final String SET = "set";
-	private static final String CONSTRUCTOR = "create";
-
 	private Class<?> type;
 
 	public StaticInvocationResolver(Class<?> type) {
@@ -22,21 +26,16 @@ public class StaticInvocationResolver {
 	}
 
 	protected StaticMethodInvocationHandler findInvocationHandler(Method method) throws NoSuchMethodException {
-		String methodName = method.getName();
-		Class<?> resultType = method.getReturnType();
-		Class<?>[] parameterTypes = method.getParameterTypes();
-		Class<?>[] exceptionTypes = method.getExceptionTypes();
-		Class<?> returnType = method.getReturnType();
 		try {
-			return findMethod(methodName, resultType, parameterTypes, exceptionTypes);
+			return createMethodInvocator(method);
 		} catch (NoSuchMethodException e) {
 			try {
-				if (methodName.equals(CONSTRUCTOR)) {
-					return findConstructor(parameterTypes, exceptionTypes);
-				} else if (methodName.length() > 3 && methodName.startsWith(SET) && parameterTypes.length == 1 && exceptionTypes.length == 0) {
-					return findSetter(methodName, parameterTypes[0]);
-				} else if (methodName.length() > 3 && methodName.startsWith(GET) && parameterTypes.length == 0 && exceptionTypes.length == 0) {
-					return findGetter(methodName, returnType);
+				if (isConstructor(method)) {
+					return createConstructorInvocator(method);
+				} else if (isSetter(method)) {
+					return createSetterInvocator(method);
+				} else if (isGetter(method) || isBooleanGetter(method)) {
+					return createGetterInvocator(method);
 				} else {
 					throw e;
 				}
@@ -46,72 +45,70 @@ public class StaticInvocationResolver {
 		}
 	}
 
-	protected ConstructorInvoker findConstructor(Class<?>[] parameterTypes, Class<?>[] exceptionTypes) throws NoSuchMethodException {
-		for (Constructor<?> constructor : type.getDeclaredConstructors()) {
-			if (matches(constructor.getParameterTypes(), parameterTypes)) {
-				if (Arrays.equals(exceptionTypes, constructor.getExceptionTypes())) {
-					return new ConstructorInvoker(constructor);
-				}
+	protected StaticMethodInvocationHandler createMethodInvocator(Method method) throws NoSuchMethodException {
+		Class<?> currentClass = type;
+		while (currentClass != Object.class) {
+			try {
+				Method canditate = findMatchingMethod(method, currentClass);
+				return new StaticMethodInvoker(currentClass, canditate);
+			} catch (NoSuchMethodException e) {
 			}
+			currentClass = currentClass.getSuperclass();
 		}
-		throw new NoSuchMethodException(type.getSimpleName() + Arrays.asList(parameterTypes));
+		throw new NoSuchMethodException(methodSignature(method.getName(), method.getReturnType(), method.getParameterTypes(), method.getExceptionTypes()));
 	}
 
-	protected boolean matches(Class<?>[] expected, Class<?>[] found) {
-		if (expected.length != found.length) {
-			return false;
-		}
-		for (int i = 0; i < expected.length; i++) {
-			if (!expected[i].isAssignableFrom(found[i])) {
-				return false;
-			}
-		}
-		return true;
+	protected StaticMethodInvocationHandler createConstructorInvocator(Method method) throws NoSuchMethodException {
+		Constructor<?> constructor = findMatchingConstructor(method, type);
+		return new ConstructorInvoker(constructor);
 	}
 
-	protected StaticSetter findSetter(String methodName, Class<?> fieldtype) throws NoSuchFieldException {
-		String fieldName = methodName.substring(3);
-		return new StaticSetter(type, findField(fieldName, fieldtype));
+	protected StaticMethodInvocationHandler createGetterInvocator(Method method) throws NoSuchFieldException {
+		return new StaticGetter(type, findField(propertyOf(method), method.getReturnType(), new Annotation[0]));
 	}
 
-	protected StaticGetter findGetter(String methodName, Class<?> fieldtype) throws NoSuchFieldException {
-		String fieldName = methodName.substring(3);
-		return new StaticGetter(type, findField(fieldName, fieldtype));
+	protected StaticMethodInvocationHandler createSetterInvocator(Method method) throws NoSuchFieldException {
+		return new StaticSetter(type, findField(propertyOf(method), method.getParameterTypes()[0], new Annotation[0]));
 	}
 
-	protected Field findField(String fieldPattern, Class<?> fieldType) throws NoSuchFieldException {
+	protected Field findField(String fieldPattern, Class<?> type, Annotation[] annotations) throws NoSuchFieldException {
+		String convert = containsConvertable(annotations, type);
 		List<String> fieldNames = SignatureUtil.computeFieldNames(fieldPattern);
-		Class<?> nextType = type;
-		while (nextType != Object.class) {
+		Class<?> currentClass = this.type;
+		while (currentClass != Object.class) {
 			for (String fieldName : fieldNames) {
 				try {
-					Field field = nextType.getDeclaredField(fieldName);
-					if (field.getType() != fieldType) {
-						throw new NoSuchFieldException();
-					} else {
+					Field field = currentClass.getDeclaredField(fieldName);
+					if (field.getType() == type) {
 						return field;
+					} else if (field.getType().getSimpleName().equals(convert)) {
+						return field;
+					} else {
+						throw new NoSuchFieldException();
 					}
 				} catch (NoSuchFieldException e) {
 				}
 			}
-			nextType = nextType.getSuperclass();
+			currentClass = currentClass.getSuperclass();
 		}
 		throw new NoSuchFieldException(fieldSignature(fieldNames, type));
 	}
 
-	protected StaticMethodInvoker findMethod(String methodName, Class<?> resultType, Class<?>[] parameterTypes, Class<?>[] exceptionTypes) throws NoSuchMethodException {
-		Class<?> nextType = type;
-		while (nextType != Object.class) {
-			try {
-				Method method = nextType.getDeclaredMethod(methodName, parameterTypes);
-				if (Arrays.equals(exceptionTypes, method.getExceptionTypes())) {
-					return new StaticMethodInvoker(nextType, method);
-				}
-			} catch (NoSuchMethodException e) {
-			}
-			nextType = nextType.getSuperclass();
+	private Method findMatchingMethod(Method method, Class<?> clazz) throws NoSuchMethodException {
+		Method candidate = clazz.getDeclaredMethod(method.getName(), method.getParameterTypes());
+		if (matchesSignature(method, candidate, null, null)) {
+			return candidate;
 		}
-		throw new NoSuchMethodException(methodSignature(methodName, resultType, parameterTypes, exceptionTypes));
+		throw new NoSuchMethodException();
+	}
+
+	private Constructor<?> findMatchingConstructor(Method method, Class<?> clazz) throws NoSuchMethodException {
+		for (Constructor<?> candidate : clazz.getDeclaredConstructors()) {
+			if (matchesSignature(method, candidate, null, null)) {
+				return candidate;
+			}
+		}
+		throw new NoSuchMethodException(clazz.getSimpleName() + Arrays.asList(method.getParameterTypes()));
 	}
 
 }

@@ -5,144 +5,206 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
-import org.junit.Before;
 import org.junit.Test;
 
-import com.almondtools.picklock.StaticInvocationResolver;
 
 @SuppressWarnings("unused")
 public class StaticInvocationResolverTest {
 
-	private StaticInvocationResolver resolver;
-
-	@Before
-	public void before() {
-		this.resolver = new StaticInvocationResolver(TestSubClass.class);
-	}
-
 	@Test
 	public void testFindField() throws Exception {
-		assertThat(resolver.findField("bo", boolean.class), notNullValue());
-		assertThat(resolver.findField("st", String.class), notNullValue());
-		assertThat(resolver.findField("IN", int.class), notNullValue());
+		StaticInvocationResolver resolver = new StaticInvocationResolver(TestSubClass.class);
+		assertThat(resolver.findField("bo", boolean.class, new Annotation[0]), notNullValue());
+		assertThat(resolver.findField("st", String.class, new Annotation[0]), notNullValue());
+		assertThat(resolver.findField("IN", int.class, new Annotation[0]), notNullValue());
 	}
 
 	@Test(expected = NoSuchFieldException.class)
 	public void testFindFieldNonExisting() throws Exception {
-		assertThat(resolver.findField("a", boolean.class), notNullValue());
+		StaticInvocationResolver resolver = new StaticInvocationResolver(TestSubClass.class);
+		resolver.findField("a", boolean.class, new Annotation[0]);
 	}
 
 	@Test(expected = NoSuchFieldException.class)
 	public void testFindSuperFieldWronglyTyped() throws Exception {
-		assertThat(resolver.findField("st", boolean.class), notNullValue());
+		StaticInvocationResolver resolver = new StaticInvocationResolver(TestSubClass.class);
+		resolver.findField("st", boolean.class, new Annotation[0]);
 	}
 
 	@Test(expected = NoSuchFieldException.class)
 	public void testFindFieldWronglyTyped() throws Exception {
-		assertThat(resolver.findField("bo", String.class), notNullValue());
+		StaticInvocationResolver resolver = new StaticInvocationResolver(TestSubClass.class);
+		resolver.findField("bo", String.class, new Annotation[0]);
 	}
 
 	@Test
-	public void testFindSetter() throws Exception {
-		assertThat(resolver.findSetter("setSt", String.class), notNullValue());
-		assertThat(resolver.findSetter("setIN", int.class), notNullValue());
-		assertThat(resolver.findGetter("setBo", boolean.class), notNullValue());
+	public void testCreateSetterInvocator() throws Exception {
+		StaticInvocationResolver resolver = new StaticInvocationResolver(TestSubClass.class);
+		Method[] setters = Setters.class.getDeclaredMethods();
+		assertThat(resolver.createSetterInvocator(setters[0]), notNullValue());
+		assertThat(resolver.createSetterInvocator(setters[1]), notNullValue());
+		assertThat(resolver.createSetterInvocator(setters[2]), notNullValue());
 	}
 
 	@Test(expected = NoSuchFieldException.class)
-	public void testFindSetterOnNonexistent() throws Exception {
-		resolver.findSetter("setX", String.class);
+	public void testCreateSetterInvocatorFails() throws Exception {
+		StaticInvocationResolver resolver = new StaticInvocationResolver(TestSubClass.class);
+		Method[] setters = BadSetters.class.getDeclaredMethods();
+		resolver.createSetterInvocator(setters[0]);
+	}
+
+	@Test
+	public void testCreateGetterInvocator() throws Exception {
+		StaticInvocationResolver resolver = new StaticInvocationResolver(TestSubClass.class);
+		Method[] getters = Getters.class.getDeclaredMethods();
+		assertThat(resolver.createGetterInvocator(getters[0]), notNullValue());
+		assertThat(resolver.createGetterInvocator(getters[1]), notNullValue());
+		assertThat(resolver.createGetterInvocator(getters[2]), notNullValue());
 	}
 
 	@Test(expected = NoSuchFieldException.class)
-	public void testFindSetterOnWronglyTyped() throws Exception {
-		resolver.findSetter("setS", int.class);
+	public void testCreateGetterInvocatorFails() throws Exception {
+		StaticInvocationResolver resolver = new StaticInvocationResolver(TestSubClass.class);
+		Method[] getters = BadGetters.class.getDeclaredMethods();
+		resolver.createGetterInvocator(getters[0]);
 	}
 
 	@Test
-	public void testFindGetter() throws Exception {
-		assertThat(resolver.findGetter("getSt", String.class), notNullValue());
-		assertThat(resolver.findGetter("getIN", int.class), notNullValue());
-		assertThat(resolver.findGetter("getBo", boolean.class), notNullValue());
+	public void testCreateMethodInvocator() throws Exception {
+		StaticInvocationResolver resolver = new StaticInvocationResolver(TestSubClass.class);
+		Method[] methods = Methods.class.getDeclaredMethods();
+		assertThat(methods.length, equalTo(5));
+		assertThat(resolver.createMethodInvocator(methods[0]), notNullValue());
+		assertThat(resolver.createMethodInvocator(methods[1]), notNullValue());
+		assertThat(resolver.createMethodInvocator(methods[2]), notNullValue());
+		assertThat(resolver.createMethodInvocator(methods[3]), notNullValue());
+		assertThat(resolver.createMethodInvocator(methods[4]), notNullValue());
+
 	}
 
-	@Test(expected = NoSuchFieldException.class)
-	public void testFindGetterOnNonexistent() throws Exception {
-		resolver.findGetter("setX", String.class);
+	@Test(expected = NoSuchMethodException.class)
+	public void testCreateMethodInvocatorNonExisting() throws Exception {
+		StaticInvocationResolver resolver = new StaticInvocationResolver(TestSubClass.class);
+		Method[] badmethods = BadMethods.class.getDeclaredMethods();
+		resolver.createMethodInvocator(badmethods[0]);
 	}
 
-	@Test(expected = NoSuchFieldException.class)
-	public void testFindGetterOnWronglyTyped() throws Exception {
-		resolver.findGetter("setS", int.class);
+	@Test(expected = NoSuchMethodException.class)
+	public void testCreateMethodInvocatorWronglySignature() throws Exception {
+		StaticInvocationResolver resolver = new StaticInvocationResolver(TestSubClass.class);
+		Method[] badmethods = BadMethods.class.getDeclaredMethods();
+		resolver.createMethodInvocator(badmethods[1]);
+	}
+
+	@Test(expected = NoSuchMethodException.class)
+	public void testCreateMethodInvocatorWronglyTyped() throws Exception {
+		StaticInvocationResolver resolver = new StaticInvocationResolver(TestSubClass.class);
+		Method[] badmethods = BadMethods.class.getDeclaredMethods();
+		resolver.createMethodInvocator(badmethods[2]);
+	}
+
+	@Test(expected = NoSuchMethodException.class)
+	public void testCreateMethodInvocatorWronglyExceptionTyped() throws Exception {
+		StaticInvocationResolver resolver = new StaticInvocationResolver(TestSubClass.class);
+		Method[] badmethods = BadMethods.class.getDeclaredMethods();
+		resolver.createMethodInvocator(badmethods[3]);
+	}
+
+	@Test(expected = NoSuchMethodException.class)
+	public void testCreateMethodInvocatorWronglyExceptionTypedInSuperclass() throws Exception {
+		StaticInvocationResolver resolver = new StaticInvocationResolver(TestSubClass.class);
+		Method[] badmethods = BadMethods.class.getDeclaredMethods();
+		resolver.createMethodInvocator(badmethods[4]);
+	}
+
+	@Test(expected = NoSuchMethodException.class)
+	public void testCreateMethodInvocatorWrongResultType() throws Exception {
+		StaticInvocationResolver resolver = new StaticInvocationResolver(TestSubClass.class);
+		Method[] badmethods = BadMethods.class.getDeclaredMethods();
+		resolver.createMethodInvocator(badmethods[5]);
 	}
 
 	@Test
-	public void testFindMethod() throws Exception {
-		assertThat(resolver.findMethod("methoda", String.class, new Class[0], new Class[0]), notNullValue());
-		assertThat(resolver.findMethod("methodb", String.class, new Class[] { String.class }, new Class[0]), notNullValue());
-		assertThat(resolver.findMethod("methodc", String.class, new Class[] { String.class }, new Class[] { Exception.class }), notNullValue());
-		assertThat(resolver.findMethod("methodd", String.class, new Class[] { String.class }, new Class[] { Exception.class }), notNullValue());
-		assertThat(resolver.findMethod("methode", String.class, new Class[] { String.class }, new Class[] { Exception.class }), notNullValue());
+	public void testCreateConstructorInvocator() throws Exception {
+		StaticInvocationResolver resolver = new StaticInvocationResolver(TestSubClass.class);
+		Method[] constructors = Constructors.class.getDeclaredMethods();
+		assertThat(constructors.length, equalTo(3));
+		assertThat(resolver.createConstructorInvocator(constructors[0]), notNullValue());
+		assertThat(resolver.createConstructorInvocator(constructors[1]), notNullValue());
+		assertThat(resolver.createConstructorInvocator(constructors[2]), notNullValue());
 	}
 
 	@Test(expected = NoSuchMethodException.class)
-	public void testFindMethodNonExisting() throws Exception {
-		assertThat(resolver.findMethod("methodz", String.class, new Class[0], new Class[0]), notNullValue());
+	public void testCreateConstructorInvocatorWronglySignature() throws Exception {
+		StaticInvocationResolver resolver = new StaticInvocationResolver(TestSubClass.class);
+		Method[] constructors = BadConstructors.class.getDeclaredMethods();
+		resolver.createConstructorInvocator(constructors[0]);
 	}
 
 	@Test(expected = NoSuchMethodException.class)
-	public void testFindMethodWronglySignature() throws Exception {
-		assertThat(resolver.findMethod("methodb", String.class, new Class[0], new Class[0]), notNullValue());
+	public void testCreateConstructorInvocatorWronglyTyped() throws Exception {
+		StaticInvocationResolver resolver = new StaticInvocationResolver(TestSubClass.class);
+		Method[] constructors = BadConstructors.class.getDeclaredMethods();
+		resolver.createConstructorInvocator(constructors[1]);
 	}
 
 	@Test(expected = NoSuchMethodException.class)
-	public void testFindMethodWronglyTyped() throws Exception {
-		assertThat(resolver.findMethod("methodb", String.class, new Class[] { int.class }, new Class[0]), notNullValue());
+	public void testCreateConstructorInvocatorWronglyExceptionTyped() throws Exception {
+		StaticInvocationResolver resolver = new StaticInvocationResolver(TestSubClass.class);
+		Method[] constructors = BadConstructors.class.getDeclaredMethods();
+		resolver.createConstructorInvocator(constructors[2]);
 	}
 
-	@Test(expected = NoSuchMethodException.class)
-	public void testFindMethodWronglyExceptionTyped() throws Exception {
-		assertThat(resolver.findMethod("methodb", String.class, new Class[] { String.class }, new Class[] { Exception.class }), notNullValue());
+	interface Getters {
+		String getSt();
+		int getIN();
+		boolean getBo();
 	}
 
-	@Test(expected = NoSuchMethodException.class)
-	public void testFindMethodWronglyExceptionTypedInSuperclass() throws Exception {
-		assertThat(resolver.findMethod("methode", String.class, new Class[] { String.class }, new Class[] { IOException.class }), notNullValue());
+	interface Setters {
+		void setSt(String s);
+		void setIN(int i);
+		void setBo(boolean b);
+	}
+	
+	interface BadGetters {
+		String getA();
 	}
 
-	@Test
-	public void testFindConstructor() throws Exception {
-		assertThat(resolver.findConstructor(new Class[0], new Class[0]), notNullValue());
-		assertThat(resolver.findConstructor(new Class[] { String.class }, new Class[0]), notNullValue());
-		assertThat(resolver.findConstructor(new Class[] { int.class }, new Class[] { Exception.class }), notNullValue());
+	interface BadSetters {
+		void setA(boolean b);
+	}
+	
+	interface Methods {
+		void methoda();
+		void methodb(String s);
+		void methodc(String s) throws Exception;
+		String methodd(String s) throws Exception;
+		String methode(String s) throws Exception;
 	}
 
-	@Test(expected = NoSuchMethodException.class)
-	public void testFindConstructorWronglySignature() throws Exception {
-		assertThat(resolver.findConstructor(new Class[]{String.class, boolean.class}, new Class[0]), notNullValue());
+	interface BadMethods {
+		String methodz();
+		void methodb();
+		void methodb(int i);
+		void methodb(String s) throws Exception;
+		String methode(String s) throws IOException;
+		String methoda();
 	}
-
-	@Test(expected = NoSuchMethodException.class)
-	public void testFindConstructorWronglyTyped() throws Exception {
-		assertThat(resolver.findConstructor(new Class[] { boolean.class }, new Class[0]), notNullValue());
+	
+	interface Constructors {
+		TestSubClass create();
+		TestSubClass create(String s);
+		TestSubClass create(int i) throws Exception;
 	}
-
-	@Test(expected = NoSuchMethodException.class)
-	public void testFindConstructorWronglyExceptionTyped() throws Exception {
-		assertThat(resolver.findConstructor(new Class[] { int.class }, new Class[] { IOException.class }), notNullValue());
-	}
-
-	@Test
-	public void testMatches() throws Exception {
-		assertThat(resolver.matches(new Class[0], new Class[0]), equalTo(true));
-		assertThat(resolver.matches(new Class[] { String.class }, new Class[] { String.class }), equalTo(true));
-		assertThat(resolver.matches(new Class[] { String.class }, new Class[0]), equalTo(false));
-		assertThat(resolver.matches(new Class[0], new Class[] { String.class }), equalTo(false));
-		assertThat(resolver.matches(new Class[] { int.class }, new Class[] { String.class }), equalTo(false));
-		assertThat(resolver.matches(new Class[] { String.class }, new Class[] { int.class }), equalTo(false));
-		assertThat(resolver.matches(new Class[] { Object.class }, new Class[] { String.class }), equalTo(true));
-		assertThat(resolver.matches(new Class[] { String.class }, new Class[] { Object.class }), equalTo(false));
+	
+	interface BadConstructors {
+		TestSubClass create(String s, boolean b);
+		TestSubClass create(boolean b);
+		TestSubClass create(int i) throws IOException;
 	}
 
 	private static class TestClass {
@@ -179,5 +241,4 @@ public class StaticInvocationResolverTest {
 			return null;
 		}
 	}
-
 }

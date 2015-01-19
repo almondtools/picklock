@@ -42,6 +42,20 @@ public class InvocationResolverTest {
 		assertThat(resolver.createSetterInvocator(setters[2]), notNullValue());
 	}
 
+	@Test(expected=NoSuchFieldException.class)
+	public void testCreateGetterInvocatorFails() throws Exception {
+		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
+		Method[] getters = BadGetters.class.getDeclaredMethods();
+		resolver.createGetterInvocator(getters[0]);
+	}
+
+	@Test(expected=NoSuchFieldException.class)
+	public void testCreateSetterInvocatorFails() throws Exception {
+		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
+		Method[] setters = BadSetters.class.getDeclaredMethods();
+		resolver.createSetterInvocator(setters[0]);
+	}
+
 	@Test(expected = NoSuchFieldException.class)
 	public void testFindFieldNonExisting() throws Exception {
 		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
@@ -82,70 +96,70 @@ public class InvocationResolverTest {
 	}
 
 	@Test(expected = NoSuchMethodException.class)
-	public void testFindMethodNonExisting() throws Exception {
+	public void testCreateMethodInvocatorNonExisting() throws Exception {
 		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
 		Method[] badmethods = BadMethods.class.getDeclaredMethods();
 		resolver.createMethodInvocator(badmethods[0]);
 	}
 
 	@Test(expected = NoSuchMethodException.class)
-	public void testFindMethodWronglyReturnType() throws Exception {
+	public void testCreateMethodInvocatorWronglyReturnType() throws Exception {
 		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
 		Method[] badmethods = BadMethods.class.getDeclaredMethods();
 		resolver.createMethodInvocator(badmethods[1]);
 	}
 
 	@Test(expected = NoSuchMethodException.class)
-	public void testFindMethodWronglySignature() throws Exception {
+	public void testCreateMethodInvocatorWronglySignature() throws Exception {
 		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
 		Method[] badmethods = BadMethods.class.getDeclaredMethods();
 		resolver.createMethodInvocator(badmethods[2]);
 	}
 
 	@Test(expected = NoSuchMethodException.class)
-	public void testFindMethodWronglyTyped() throws Exception {
+	public void testCreateMethodInvocatorWronglyTyped() throws Exception {
 		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
 		Method[] badmethods = BadMethods.class.getDeclaredMethods();
 		resolver.createMethodInvocator(badmethods[3]);
 	}
 
 	@Test(expected = NoSuchMethodException.class)
-	public void testFindMethodWronglyExceptionTyped() throws Exception {
+	public void testCreateMethodInvocatorWronglyExceptionTyped() throws Exception {
 		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
 		Method[] badmethods = BadMethods.class.getDeclaredMethods();
 		resolver.createMethodInvocator(badmethods[4]);
 	}
 
 	@Test(expected = NoSuchMethodException.class)
-	public void testFindMethodWronglyExceptionTypedInSuperclass() throws Exception {
+	public void testCreateMethodInvocatorWronglyExceptionTypedInSuperclass() throws Exception {
 		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
 		Method[] badmethods = BadMethods.class.getDeclaredMethods();
 		resolver.createMethodInvocator(badmethods[5]);
 	}
 
 	@Test(expected = NoSuchMethodException.class)
-	public void testFindMethodNotConvertableArguments() throws Exception {
+	public void testCreateMethodInvocatorNotConvertableArguments() throws Exception {
 		InvocationResolver resolver = new InvocationResolver(ConvertableTestClass.class);
 		Method[] badmethods = NonConvertableMethods.class.getDeclaredMethods();
 		resolver.createMethodInvocator(badmethods[0]);
 	}
 
 	@Test(expected = NoSuchMethodException.class)
-	public void testFindMethodNotConvertableResult() throws Exception {
+	public void testCreateMethodInvocatorNotConvertableResult() throws Exception {
 		InvocationResolver resolver = new InvocationResolver(ConvertableTestClass.class);
 		Method[] badmethods = NonConvertableMethods.class.getDeclaredMethods();
 		resolver.createMethodInvocator(badmethods[1]);
 	}
 
 	@Test(expected = NoSuchMethodException.class)
-	public void testFindMethodFailedConvertableArguments() throws Exception {
+	public void testCreateMethodInvocatorFailedConvertableArguments() throws Exception {
 		InvocationResolver resolver = new InvocationResolver(ConvertableTestClass.class);
 		Method[] badmethods = FailedConvertableMethods.class.getDeclaredMethods();
 		resolver.createMethodInvocator(badmethods[0]);
 	}
 
 	@Test(expected = NoSuchMethodException.class)
-	public void testFindMethodFailedConvertableResult() throws Exception {
+	public void testCreateMethodInvocatorFailedConvertableResult() throws Exception {
 		InvocationResolver resolver = new InvocationResolver(ConvertableTestClass.class);
 		Method[] badmethods = FailedConvertableMethods.class.getDeclaredMethods();
 		resolver.createMethodInvocator(badmethods[1]);
@@ -161,6 +175,14 @@ public class InvocationResolverTest {
 		void setS(String s);
 		void setI(int i);
 		void setB(boolean b);
+	}
+	
+	interface BadGetters {
+		String getA();
+	}
+
+	interface BadSetters {
+		void setA(boolean b);
 	}
 	
 	interface Methods {
