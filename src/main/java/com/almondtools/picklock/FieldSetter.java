@@ -3,6 +3,9 @@ package com.almondtools.picklock;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
+/**
+ * Wraps a field with modification (setter) access.
+ */
 public class FieldSetter implements MethodInvocationHandler {
 
 	private Field field;

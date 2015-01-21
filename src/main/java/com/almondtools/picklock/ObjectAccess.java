@@ -9,14 +9,49 @@ import java.util.Map;
 /**
  * ObjectAccess is a Decorator for any object that should get a new public interface. Usage:
  * 
- * <strong>InterfaceOfTheDecorator unlocked = ObjectAccess.unlock(object).features(InterfaceOfTheDecorator.class);</strong>
+ * <p><code>InterfaceOfTheDecorator unlocked = ObjectAccess.unlock(object).features(InterfaceOfTheDecorator.class);</code>
  * 
- * after that the variable unlocked contains an object of type InterfaceOfTheDecorator, where each method is mapped according to the picklock conventions:
+ * <p>After that the variable unlocked contains an object of type InterfaceOfTheDecorator, where each method is mapped according to the picklock conventions:
  * 
- * - void setProperty([sometype] t) => <strong>void setProperty([sometype] t)</strong> if exists or <strong>property = t;</strong> if there is a <strong>property static [sometype] property;</strong>
- * - [sometype] getProperty() => <strong>[sometype] getProperty()</strong> if exists or <strong>return property;</strong> if there is a <strong>property static [sometype] property;</strong>
- * - [booleantype] isProperty() => <strong>[booleantype] isProperty()</strong> if exists or <strong>return property;</strong> if there is a <strong>property static [booleantype] property;</strong>
- * - [return type] methodname([signature]) => <strong>static [return type] methodname([signature])</strong>
+ *  * <table>
+ * <col width="30%"/> <col width="30%"/> <col width="40%"/>
+ * <thead><tr><th>Method</th><th>Maps to</th><th></th></tr><thead>
+ * <tr>
+ * <td><code>void setProperty([sometype] t)</code></td>
+ * <td><code>void setProperty([sometype] t)</code></td>
+ * <td>if exists</td>
+ * </tr>
+ * <tr>
+ * <td></td>
+ * <td><code>property = t;</code></td>
+ * <td>if there is a property <code>[sometype] property;</td>
+ * </tr>
+ * <tr>
+ * <td><code>[sometype] getProperty()</code></td>
+ * <td><code>[sometype] getProperty()</code></td>
+ * <td>if exists</td>
+ * <tr>
+ * <tr>
+ * <td></td>
+ * <td><code>return property;</code></td>
+ * <td>if there is a property <code>[sometype] property;</td>
+ * </tr>
+ * <tr>
+ * <td><code>[booleantype] isProperty()</code></td>
+ * <td><code>[booleantype] getProperty()</code></td>
+ * <td>if exists</td>
+ * <tr>
+ * <tr>
+ * <td></td>
+ * <td><code>return property;</code></td>
+ * <td>if there is a property <code>[booleantype] property;</td>
+ * </tr>
+ * <tr>
+ * <td><code>[return type] methodname([signature])</code></td>
+ * <td><code>[return type] methodname([signature])</code></td>
+ * <td></td>
+ * </tr>
+ * </table>
  * 
  * @author Stefan Mandel
  */
@@ -49,7 +84,7 @@ public class ObjectAccess extends InvocationResolver implements InvocationHandle
 	/**
 	 * wraps the given class. The result of this method is a {@link ObjectSnoop} object which enables the user to check if a wrapped object (of the given class)
 	 * could be target of a mapping from a specific interface. Note that a class (not an object) is wrapped, but the result will check the instance interface of this class
-	 * (all non-static methods without constructors) not the static interface. static interfaces could be checked with {@link ClassAccess.check}. 
+	 * (all non-static methods without constructors) not the static interface. static interfaces could be checked with {@link com.almondtools.picklock.ClassAccess#check(Class<?>)}. 
 	 * 
 	 * @param type
 	 *            the target class to check

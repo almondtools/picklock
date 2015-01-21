@@ -5,6 +5,10 @@ import static com.almondtools.picklock.Converter.convert;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+/**
+ * Invokes a given method. Beyond {@link MethodInvoker} this class also converts the argument according to its annotation signature
+ * @see Convert
+ */
 public class ConvertingMethodInvoker implements MethodInvocationHandler {
 
 	private Method method;

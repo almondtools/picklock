@@ -2,6 +2,9 @@ package com.almondtools.picklock;
 
 import java.lang.reflect.Field;
 
+/**
+ * Wraps a field with read (getter) access. Beyond {@link FieldGetter} this class also wraps the result to a given targetType.
+ */
 public class ConvertingFieldGetter implements MethodInvocationHandler {
 
 	private Field field;

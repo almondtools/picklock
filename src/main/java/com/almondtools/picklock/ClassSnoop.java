@@ -7,9 +7,9 @@ import java.util.List;
 /**
  * ClassSnoop is a Decorator for the static interface of a java class. It helps finding conflicts of the wrapped class with a given picklock interface. Usage:
  * 
- * <strong>List<Method> conflictingMethods = ClassAccess.check(ClasstoCheck.class).onConflicts(InterfaceToMapFrom.class);</strong>
+ * <p><code>List<Method> conflictingMethods = ClassAccess.check(ClasstoCheck.class).onConflicts(InterfaceToMapFrom.class);</code>
  * 
- * The conflicting methods are all methods that could not be mapped according to the rules in {@link ClassAccess}
+ * <p>The conflicting methods are all methods that could not be mapped according to the rules in {@link ClassAccess}
  * 
  * @author Stefan Mandel
  */

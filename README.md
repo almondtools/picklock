@@ -217,39 +217,41 @@ matching signature.
 Picklock's Benefits
 ===================
 Regarding the picklock solutions, there is
-* No need to lookup the class of House
+* No need to lookup the class of the object to access
 * No need to lookup the method or properties by string names
 * No need to wrap argument types and arguments
 * No need to enable invocations of private methods
 * No need to invocate functions in a non-object-oriented way
 
-Why should we prefer picklock reflection over java reflection?
-==============================================================
+Why and when should we prefer picklock reflection over java reflection?
+=======================================================================
 
-There are several reasons why one should avoid classical random access reflection in java, e.g.
-* reflection is not performant
-* reflection is cumbersome (several string lookups, security disabling)
-* reflection using Strings is not robust to renamings
-* reflection is an indicator of bad software design
-* reflection may cause security leaks (if the input string is unvalidated user input, e.g. a url parameter)
-* reflection may cause problems with the type system
-
-Picklock enables you to use reflection without may of the common problems of reflection
-* picklock is convenient to use (2 steps: unlock interface, call method)
-* picklock uses method invocation, no strings at all (mapping of methods is done by conventions)
-* picklock uses a kind of Adaptor/Decorator design pattern, which is the object oriented way of exposing a new feature
-* picklock prevents security issues because it does not depend on string operations
-* picklock is independent from the concrete type of the accessed object
+Java reflection
+* is not performant
+* is cumbersome (several string lookups, access enabling)
+* is string based (and not robust at member renamings)
+* may cause security leaks (if the input string is unvalidated user input, e.g. a url parameter)
+* could in most applications be replaced by appropriate design patterns
+ 
+Picklock covers only one aspect of reflection => access to private but statically known members. Picklock 
+* is convenient to use (2 steps: unlock interface, call method/property)
+* is not string based, one basically only needs the object to access and a type definition of the interface you want use for access 
+* uses a kind of adaptor/decorator design pattern, which is the object oriented way of exposing a new feature
+* prevents some security issues (user input cannot control reflective interface, because picklock does not depend on strings) 
 
 
 Maintaining and Tracking Picklocked Objects
 ===========================================
-A good reason why one should avoid java reflection, is, that it fails at runtime, not at compile time and not at build time. This makes reflection unpredictable and risky. 
+Can we view Picklock as a statically typed interface to Reflection? Not really! Although we operate on pure java interfaces, these interfaces are dynamically
+mapped to the target objects. Renaming of class members could break this mapping.
 
-Picklock attempts will probably never fail at compile time, but some coding discipline is sufficient, to let picklock fail at build time (i.e. at test time). What is to be done:
+But contrary to reflection we could easily assert that our picklock assumptions on a certain object hold. Just write a test:
 * determine any pair of types (locked class, unlocked facade class)
 * write a test containing only "ObjectAccess.check(house.getClass()).isUnlockable(PicklockedHouse.class);"
-* this test would always fail, if the internals used by Picklock do not exist any more (e.g. because the foreign implementation changed)
+* if picklocking a static interface the test would look like "ClassAccess.check(TheOneAndOnly.class).isUnlockable(PicklockedStatic.class);"
+* this test would always fail, if the internals used by Picklock do not exist any more (e.g. because the member names changed)
+
+Such a test is nearly as robust as static compile time checking. 
 
 
 Now why should we use this?

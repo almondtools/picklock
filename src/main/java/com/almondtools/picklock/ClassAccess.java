@@ -9,15 +9,56 @@ import java.util.Map;
 /**
  * ClassAccess is a Decorator for the static interface of a java class. Usage:
  * 
- * <strong>InterfaceOfTheDecorator unlocked = ClassAccess.unlock(ClassToUnlock.class).features(InterfaceOfTheDecorator.class);</strong>
+ * <p>
+ * <code>InterfaceOfTheDecorator unlocked = ClassAccess.unlock(ClassToUnlock.class).features(InterfaceOfTheDecorator.class);</code>
  * 
- * after that the variable unlocked contains an object of type InterfaceOfTheDecorator, where each method is mapped according to the picklock conventions:
+ * <p>
+ * After that the variable unlocked contains an object of type InterfaceOfTheDecorator, where each method is mapped according to the picklock conventions:
  * 
- * - ClassToUnlock create([signature]) => <strong>ClassToUnlock([signature])</strong>
- * - void setProperty([sometype] t) => <strong>static void setProperty([sometype] t)</strong> if exists or <strong>property = t;</strong> if there is a <strong>property static [sometype] property;</strong>
- * - [sometype] getProperty() => <strong>static [sometype] getProperty()</strong> if exists or <strong>return property;</strong> if there is a <strong>property static [sometype] property;</strong>
- * - [booleantype] isProperty() => <strong>static [booleantype] isProperty()</strong> if exists or <strong>return property;</strong> if there is a <strong>property static [booleantype] property;</strong>
- * - [return type] methodname([signature]) => <strong>static [return type] methodname([signature])</strong>
+ * <table>
+ * <col width="30%"/> <col width="30%"/> <col width="40%"/>
+ * <thead><tr><th>Method</th><th>Maps to</th><th></th></tr><thead>
+ * <tr>
+ * <td><code>ClassToUnlock create([signature])</code></td>
+ * <td><code>ClassToUnlock([signature])</code></td>
+ * <td></td>
+ * </tr>
+ * <tr>
+ * <td><code>void setProperty([sometype] t)</code></td>
+ * <td><code>static void setProperty([sometype] t)</code></td>
+ * <td>if exists</td>
+ * </tr>
+ * <tr>
+ * <td></td>
+ * <td><code>property = t;</code></td>
+ * <td>if there is a property <code>static [sometype] property;</td>
+ * </tr>
+ * <tr>
+ * <td><code>[sometype] getProperty()</code></td>
+ * <td><code>static [sometype] getProperty()</code></td>
+ * <td>if exists</td>
+ * <tr>
+ * <tr>
+ * <td></td>
+ * <td><code>return property;</code></td>
+ * <td>if there is a property <code>static [sometype] property;</td>
+ * </tr>
+ * <tr>
+ * <td><code>[booleantype] isProperty()</code></td>
+ * <td><code>static [booleantype] getProperty()</code></td>
+ * <td>if exists</td>
+ * <tr>
+ * <tr>
+ * <td></td>
+ * <td><code>return property;</code></td>
+ * <td>if there is a property <code>static [booleantype] property;</td>
+ * </tr>
+ * <tr>
+ * <td><code>[return type] methodname([signature])</code></td>
+ * <td><code>static [return type] methodname([signature])</code></td>
+ * <td></td>
+ * </tr>
+ * </table>
  * 
  * @author Stefan Mandel
  */
@@ -42,8 +83,8 @@ public class ClassAccess extends StaticInvocationResolver implements InvocationH
 	}
 
 	/**
-	 * wraps the given class. The result of this method is a {@link ClassSnoop} object which enables the user to check if the wrapped class 
-	 * is compatible with a specific unlocked interface class. Note that in this case the "static" interface (all static methods including the constructor) 
+	 * wraps the given class. The result of this method is a {@link ClassSnoop} object which enables the user to check if the wrapped class
+	 * is compatible with a specific unlocked interface class. Note that in this case the "static" interface (all static methods including the constructor)
 	 * would be checked on conflicts. The instance interface could be checked with {@link ObjectAccess.check}.
 	 * 
 	 * @param type

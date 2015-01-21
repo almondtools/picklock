@@ -7,9 +7,9 @@ import java.util.List;
 /**
  * ObjectSnoop is a Decorator for the interface of a java object. It helps finding conflicts of the wrapped class with a given picklock interface. Usage:
  * 
- * <strong>List<Method> conflictingMethods = ObjectAccess.check(ClassOfObjectToCheck.class).onConflicts(InterfaceToMapFrom.class);</strong>
+ * <p><code>List<Method> conflictingMethods = ObjectAccess.check(ClassOfObjectToCheck.class).onConflicts(InterfaceToMapFrom.class);</code>
  * 
- * The conflicting methods are all methods that could not be mapped according to the rules in {@link ObjectAccess}
+ * <p>The conflicting methods are all methods that could not be mapped according to the rules in {@link ObjectAccess}
  * 
  * @author Stefan Mandel
  */

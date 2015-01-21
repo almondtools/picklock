@@ -2,6 +2,9 @@ package com.almondtools.picklock;
 
 import java.lang.reflect.Field;
 
+/**
+ * Wraps a field with read (getter) access.
+ */
 public class FieldGetter implements MethodInvocationHandler {
 
 	private Field field;

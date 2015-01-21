@@ -3,6 +3,9 @@ package com.almondtools.picklock;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+/**
+ * Invokes a given constructor.
+ */
 public class ConstructorInvoker implements StaticMethodInvocationHandler {
 
 	private Constructor<?> constructor;

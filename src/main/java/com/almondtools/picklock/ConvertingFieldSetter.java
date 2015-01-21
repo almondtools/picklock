@@ -6,6 +6,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
+/**
+ * Wraps a field with modification (setter) access. Beyond {@link FieldSetter} this class also converts the argument from a given targetType.
+ */
 public class ConvertingFieldSetter implements MethodInvocationHandler {
 
 	private Field field;
