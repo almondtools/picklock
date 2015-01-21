@@ -2,6 +2,9 @@ package com.almondtools.picklock;
 
 import java.lang.reflect.Field;
 
+/**
+ * Wraps a static field with read (getter) access.
+ */
 public class StaticGetter implements StaticMethodInvocationHandler {
 
 	private Class<?> type;
