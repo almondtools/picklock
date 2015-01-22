@@ -19,6 +19,10 @@ public final class SignatureUtil {
 	private SignatureUtil() {
 	}
 
+	public static boolean isStatic(Method method) {
+		return method.getAnnotation(Static.class) != null;
+	}
+
 	public static boolean isConstructor(Method method) {
 		String name = method.getName();
 		return name.equals(CONSTRUCTOR);

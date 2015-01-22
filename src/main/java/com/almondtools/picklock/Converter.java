@@ -66,7 +66,8 @@ public class Converter {
 		return convert;
 	}
 
-	public static Object[] convertArguments(Class<?>[] targetTypes, Class<?>[] methodTypes, Object... args) throws InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException, SecurityException {
+	public static Object[] convertArguments(Class<?>[] targetTypes, Class<?>[] methodTypes, Object... args) throws InstantiationException, IllegalAccessException, NoSuchMethodException,
+		IllegalArgumentException, InvocationTargetException, SecurityException {
 		if (args == null) {
 			args = new Object[0];
 		}
@@ -111,7 +112,8 @@ public class Converter {
 		return false;
 	}
 
-	public static Object convert(Object object, Class<?> clazz, Class<?> accessibleClass) throws InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException, SecurityException {
+	public static Object convert(Object object, Class<?> clazz, Class<?> accessibleClass) throws InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException,
+		InvocationTargetException, SecurityException {
 		if (object instanceof Proxy) {
 			InvocationHandler invocationHandler = Proxy.getInvocationHandler((Proxy) object);
 			if (invocationHandler instanceof ObjectAccess) {
@@ -132,19 +134,9 @@ public class Converter {
 	}
 
 	private static Object createBaseObject(Class<?> clazz, Class<?> accessibleClass) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-		Construct construct = accessibleClass.getAnnotation(Construct.class);
-		if (construct != null) {
-			Constructor<? extends ConstructorConfig> configConstructor = construct.value().getDeclaredConstructor();
-			configConstructor.setAccessible(true);
-			ConstructorConfig config = configConstructor.newInstance();
-			Constructor<?> constructor = clazz.getDeclaredConstructor(config.signature());
-			constructor.setAccessible(true);
-			return constructor.newInstance(config.arguments());
-		} else {
-			Constructor<?> constructor = clazz.getDeclaredConstructor();
-			constructor.setAccessible(true);
-			return constructor.newInstance();
-		}
+		Constructor<?> constructor = clazz.getDeclaredConstructor();
+		constructor.setAccessible(true);
+		return constructor.newInstance();
 	}
 
 	private static List<Method[]> findProperties(Class<?> accessibleClass) {

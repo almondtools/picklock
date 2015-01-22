@@ -164,7 +164,6 @@ public class ConverterTest {
 		void setString(String s);
 	}
 
-	@Construct(SimpleObjectConstructorConfig.class)
 	interface SimpleOtherInterface {
 		String getString();
 		void setString(String s);
@@ -208,17 +207,4 @@ public class ConverterTest {
 		}
 	}
 
-	private static class SimpleObjectConstructorConfig implements ConstructorConfig {
-
-		@Override
-		public Object[] arguments() {
-			return new Object[]{"string"};
-		}
-
-		@Override
-		public Class<?>[] signature() {
-			return new Class<?>[]{String.class};
-		}
-		
-	}
 }

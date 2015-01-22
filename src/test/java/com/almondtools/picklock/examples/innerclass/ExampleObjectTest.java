@@ -6,8 +6,6 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-import com.almondtools.picklock.Construct;
-import com.almondtools.picklock.ConstructorConfig;
 import com.almondtools.picklock.Convert;
 import com.almondtools.picklock.ObjectAccess;
 
@@ -176,21 +174,7 @@ public class ExampleObjectTest {
 
 	}
 
-	@Construct(InnerStaticConstructorConfig.class)
 	interface InnerStaticWithoutStandardConstructor {
 	}
 	
-	private static class InnerStaticConstructorConfig implements ConstructorConfig {
-
-		@Override
-		public Object[] arguments() {
-			return new Object[]{"injectedstate"};
-		}
-		
-		@Override
-		public Class<?>[] signature() {
-			return new Class<?>[]{String.class};
-		}
-		
-	}
 }
