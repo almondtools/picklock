@@ -6,14 +6,19 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
 /**
- * Wraps a field with modification (setter) access. Beyond {@link FieldSetter} this class also converts the argument from a given targetType.
+ * Wraps a static field with modification (setter) access.
+ * 
+ * unfortunately some java compiler do inline literal constants. This setter may change the constant, but does not change inlined literals, resulting in strange effects.
+ * better avoid setting static final variables or make sure, that they cannot be inlined (e.g. by making its value a trivial functional expression)
  */
-public class ConvertingFieldSetter implements MethodInvocationHandler {
+public class ConvertingStaticSetter implements StaticMethodInvocationHandler {
 
+	private Class<?> type;
 	private Field field;
 	private Class<?> targetType;
 
-	public ConvertingFieldSetter(Field field, Class<?> targetType) {
+	public ConvertingStaticSetter(Class<?> type, Field field, Class<?> targetType) {
+		this.type = type;
 		this.field = field;
 		this.targetType = targetType;
 		field.setAccessible(true);
@@ -32,20 +37,21 @@ public class ConvertingFieldSetter implements MethodInvocationHandler {
 			modifiersField.setAccessible(true);
 			modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
 		} catch (Exception e) {
-			// omit this exception
+			//omit this exception
 		}
 	}
 
 	@Override
-	public Object invoke(Object object, Object[] args) throws Throwable {
+	public Object invoke(Object[] args) throws Throwable {
 		if (args == null || args.length != 1) {
 			throw new IllegalArgumentException("setters can only be invoked with exactly one argument, was " + (args == null ? "null" : String.valueOf(args.length)) + " arguments");
 		}
 		Object arg = convertArgument(targetType, field.getType(), args[0]);
-		if (arg != null && !BoxingUtil.getBoxed(field.getType()).isInstance(arg)) {
-			throw new ClassCastException("defined type of " + field.getName() + " is " + arg.getClass().getSimpleName() + ", but assigned type was " + field.getType().getSimpleName());
+		if (args[0] != null && !BoxingUtil.getBoxed(field.getType()).isInstance(args[0])) {
+			throw new ClassCastException("defined type of " + field.getName() + " is " + args[0].getClass().getSimpleName() + ", but assigned type was " + field.getType().getSimpleName());
 		}
-		field.set(object, arg);
+		field.set(type, arg);
 		return null;
 	}
+
 }

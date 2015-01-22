@@ -74,13 +74,17 @@ public class Converter {
 		Class<?>[] targetArgumentTypes = targetTypes;
 		Class<?>[] methodArgumentTypes = methodTypes;
 		for (int i = 0; i < args.length; i++) {
-			if (targetArgumentTypes[i].equals(methodArgumentTypes[i])) {
-				converted[i] = args[i];
-			} else {
-				converted[i] = convert(args[i], methodArgumentTypes[i], targetArgumentTypes[i]);
-			}
+			converted[i] = convertArgument(targetArgumentTypes[i], methodArgumentTypes[i], args[i]);
 		}
 		return converted;
+	}
+
+	public static Object convertArgument(Class<?> targetType, Class<?> methodType, Object arg) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+		if (targetType.equals(methodType)) {
+			return arg;
+		} else {
+			return convert(arg, methodType, targetType);
+		}
 	}
 
 	public static Object convertResult(Class<?> targetType, Class<?> methodType, Object result) throws NoSuchMethodException {

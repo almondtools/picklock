@@ -1,6 +1,7 @@
 package com.almondtools.picklock;
 
 import static com.almondtools.picklock.Converter.determineNeededConversions;
+import static com.almondtools.picklock.Converter.isConverted;
 import static com.almondtools.picklock.SignatureUtil.containsConvertable;
 import static com.almondtools.picklock.SignatureUtil.fieldSignature;
 import static com.almondtools.picklock.SignatureUtil.isBooleanGetter;
@@ -50,7 +51,7 @@ public class StaticInvocationResolver {
 		Class<?> currentClass = type;
 		while (currentClass != Object.class) {
 			try {
-				if (Converter.isConverted(method)) {
+				if (isConverted(method)) {
 					Method candidate = findConvertableMethod(method, currentClass);
 					return new ConvertingStaticMethodInvoker(currentClass, candidate, method);
 				} else {
@@ -65,7 +66,7 @@ public class StaticInvocationResolver {
 	}
 
 	protected StaticMethodInvocationHandler createConstructorInvocator(Method method) throws NoSuchMethodException {
-		if (Converter.isConverted(method)) {
+		if (isConverted(method)) {
 			Constructor<?> constructor = findConvertableConstructor(method, type);
 			return new ConvertingConstructorInvoker(constructor, method);
 		} else {
@@ -75,11 +76,19 @@ public class StaticInvocationResolver {
 	}
 
 	protected StaticMethodInvocationHandler createGetterInvocator(Method method) throws NoSuchFieldException {
-		return new StaticGetter(type, findField(propertyOf(method), method.getReturnType(), new Annotation[0]));
+		if (isConverted(method)) {
+			return new ConvertingStaticGetter(type, findField(propertyOf(method), method.getReturnType(), method.getAnnotations()), method.getReturnType());
+		} else {
+			return new StaticGetter(type, findField(propertyOf(method), method.getReturnType(), new Annotation[0]));
+		}
 	}
 
 	protected StaticMethodInvocationHandler createSetterInvocator(Method method) throws NoSuchFieldException {
-		return new StaticSetter(type, findField(propertyOf(method), method.getParameterTypes()[0], new Annotation[0]));
+		if (isConverted(method)) {
+			return new ConvertingStaticSetter(type, findField(propertyOf(method), method.getParameterTypes()[0], method.getParameterAnnotations()[0]), method.getParameterTypes()[0]);
+		} else {
+			return new StaticSetter(type, findField(propertyOf(method), method.getParameterTypes()[0], new Annotation[0]));
+		}
 	}
 
 	protected Field findField(String fieldPattern, Class<?> type, Annotation[] annotations) throws NoSuchFieldException {
