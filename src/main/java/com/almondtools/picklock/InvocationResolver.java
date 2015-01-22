@@ -42,7 +42,7 @@ public class InvocationResolver {
 	}
 
 	protected MethodInvocationHandler createSetterInvocator(Method method) throws NoSuchFieldException {
-		if (isConverted(method)) {
+		if (Converter.isConverted(method)) {
 			return new ConvertingFieldSetter(findField(propertyOf(method), method.getParameterTypes()[0], method.getParameterAnnotations()[0]), method.getParameterTypes()[0]);
 		} else {
 			return new FieldSetter(findField(propertyOf(method), method.getParameterTypes()[0], new Annotation[0]));
@@ -50,7 +50,7 @@ public class InvocationResolver {
 	}
 
 	protected MethodInvocationHandler createGetterInvocator(Method method) throws NoSuchFieldException {
-		if (isConverted(method)) {
+		if (Converter.isConverted(method)) {
 			return new ConvertingFieldGetter(findField(propertyOf(method), method.getReturnType(), method.getAnnotations()), method.getReturnType());
 		} else {
 			return new FieldGetter(findField(propertyOf(method), method.getReturnType(), new Annotation[0]));
@@ -84,7 +84,7 @@ public class InvocationResolver {
 		Class<?> currentClass = this.innerClass;
 		while (currentClass != Object.class) {
 			try {
-				if (isConverted(method)) {
+				if (Converter.isConverted(method)) {
 					Method candidate = findConvertableMethod(method, currentClass);
 					return new ConvertingMethodInvoker(candidate, method);
 				} else {
@@ -96,22 +96,6 @@ public class InvocationResolver {
 			currentClass = currentClass.getSuperclass();
 		}
 		throw new NoSuchMethodException(methodSignature(method.getName(), method.getReturnType(), method.getParameterTypes(), method.getExceptionTypes()));
-	}
-
-	private boolean isConverted(Method method) {
-		if (method.getAnnotation(Convert.class) != null) {
-			return true;
-		}
-		Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-		Class<?>[] parameterTypes = method.getParameterTypes();
-		for (int i = 0; i < parameterTypes.length; i++) {
-			Class<?> parameterType = parameterTypes[i];
-			Annotation[] annotations = parameterAnnotations[i];
-			if (containsConvertable(annotations, parameterType) != null) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private Method findConvertableMethod(Method method, Class<?> currentClass) throws NoSuchMethodException {

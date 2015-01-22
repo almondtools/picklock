@@ -59,8 +59,13 @@ public class StaticInvocationResolver {
 	}
 
 	protected StaticMethodInvocationHandler createConstructorInvocator(Method method) throws NoSuchMethodException {
-		Constructor<?> constructor = findMatchingConstructor(method, type);
-		return new ConstructorInvoker(constructor);
+		if (Converter.isConverted(method)) {
+			Constructor<?> constructor = findConvertableConstructor(method, type);
+			return new ConvertingConstructorInvoker(constructor, method);
+		} else {
+			Constructor<?> constructor = findMatchingConstructor(method, type);
+			return new ConstructorInvoker(constructor);
+		}
 	}
 
 	protected StaticMethodInvocationHandler createGetterInvocator(Method method) throws NoSuchFieldException {
@@ -100,6 +105,15 @@ public class StaticInvocationResolver {
 			return candidate;
 		}
 		throw new NoSuchMethodException();
+	}
+
+	private Constructor<?> findConvertableConstructor(Method method, Class<?> clazz) throws NoSuchMethodException {
+		for (Constructor<?> candidate : clazz.getDeclaredConstructors()) {
+			if (matchesSignature(method, candidate, null, null)) {
+				return candidate;
+			}
+		}
+		throw new NoSuchMethodException(clazz.getSimpleName() + Arrays.asList(method.getParameterTypes()));
 	}
 
 	private Constructor<?> findMatchingConstructor(Method method, Class<?> clazz) throws NoSuchMethodException {

@@ -1,10 +1,12 @@
 package com.almondtools.picklock;
 
+import static com.almondtools.picklock.SignatureUtil.containsConvertable;
 import static com.almondtools.picklock.SignatureUtil.isBooleanGetter;
 import static com.almondtools.picklock.SignatureUtil.isGetter;
 import static com.almondtools.picklock.SignatureUtil.isSetter;
 import static com.almondtools.picklock.SignatureUtil.propertyOf;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -54,6 +56,47 @@ public class Converter {
 			}
 		}
 		return propertyPairs;
+	}
+
+	public static Object[] convertArguments(Class<?>[] targetTypes, Class<?>[] methodTypes, Object... args) throws InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException, SecurityException {
+		if (args == null) {
+			args = new Object[0];
+		}
+		Object[] converted = new Object[args.length];
+		Class<?>[] targetArgumentTypes = targetTypes;
+		Class<?>[] methodArgumentTypes = methodTypes;
+		for (int i = 0; i < args.length; i++) {
+			if (targetArgumentTypes[i].equals(methodArgumentTypes[i])) {
+				converted[i] = args[i];
+			} else {
+				converted[i] = convert(args[i], methodArgumentTypes[i], targetArgumentTypes[i]);
+			}
+		}
+		return converted;
+	}
+
+	public static Object convertResult(Class<?> targetType, Class<?> methodType, Object result) throws NoSuchMethodException {
+		if (targetType.equals(methodType)) {
+			return result;
+		} else {
+			return ObjectAccess.unlock(result).features(targetType);
+		}
+	}
+
+	public static boolean isConverted(Method method) {
+		if (method.getAnnotation(Convert.class) != null) {
+			return true;
+		}
+		Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+		Class<?>[] parameterTypes = method.getParameterTypes();
+		for (int i = 0; i < parameterTypes.length; i++) {
+			Class<?> parameterType = parameterTypes[i];
+			Annotation[] annotations = parameterAnnotations[i];
+			if (containsConvertable(annotations, parameterType) != null) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static Object convert(Object object, Class<?> clazz, Class<?> accessibleClass) throws InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException, SecurityException {
