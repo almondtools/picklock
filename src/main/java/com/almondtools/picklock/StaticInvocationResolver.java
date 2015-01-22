@@ -1,5 +1,6 @@
 package com.almondtools.picklock;
 
+import static com.almondtools.picklock.Converter.determineNeededConversions;
 import static com.almondtools.picklock.SignatureUtil.containsConvertable;
 import static com.almondtools.picklock.SignatureUtil.fieldSignature;
 import static com.almondtools.picklock.SignatureUtil.isBooleanGetter;
@@ -49,8 +50,13 @@ public class StaticInvocationResolver {
 		Class<?> currentClass = type;
 		while (currentClass != Object.class) {
 			try {
-				Method canditate = findMatchingMethod(method, currentClass);
-				return new StaticMethodInvoker(currentClass, canditate);
+				if (Converter.isConverted(method)) {
+					Method candidate = findConvertableMethod(method, currentClass);
+					return new ConvertingStaticMethodInvoker(currentClass, candidate, method);
+				} else {
+					Method canditate = findMatchingMethod(method, currentClass);
+					return new StaticMethodInvoker(currentClass, canditate);
+				}
 			} catch (NoSuchMethodException e) {
 			}
 			currentClass = currentClass.getSuperclass();
@@ -97,6 +103,17 @@ public class StaticInvocationResolver {
 			currentClass = currentClass.getSuperclass();
 		}
 		throw new NoSuchFieldException(fieldSignature(fieldNames, type));
+	}
+
+	private Method findConvertableMethod(Method method, Class<?> clazz) throws NoSuchMethodException {
+		String[] conversionVector = determineNeededConversions(method.getParameterAnnotations(), method.getParameterTypes());
+		for (Method candidate : clazz.getDeclaredMethods()) {
+			String containsConvertable = containsConvertable(method.getAnnotations(), method.getReturnType());
+			if (matchesSignature(method, candidate, conversionVector, containsConvertable)) {
+				return candidate;
+			}
+		}
+		throw new NoSuchMethodException();
 	}
 
 	private Method findMatchingMethod(Method method, Class<?> clazz) throws NoSuchMethodException {

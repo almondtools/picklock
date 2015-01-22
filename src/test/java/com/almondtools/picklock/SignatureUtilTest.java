@@ -1,6 +1,10 @@
 package com.almondtools.picklock;
 
-import static com.almondtools.picklock.SignatureUtil.*;
+import static com.almondtools.picklock.SignatureUtil.isBooleanGetter;
+import static com.almondtools.picklock.SignatureUtil.isGetter;
+import static com.almondtools.picklock.SignatureUtil.isSetter;
+import static com.almondtools.picklock.SignatureUtil.methodSignature;
+import static com.almondtools.picklock.SignatureUtil.propertyOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;

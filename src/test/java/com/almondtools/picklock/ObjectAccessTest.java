@@ -12,8 +12,6 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.almondtools.picklock.ObjectAccess;
-
 public class ObjectAccessTest {
 
 	private LockedObject object;

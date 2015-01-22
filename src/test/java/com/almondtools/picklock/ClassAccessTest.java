@@ -9,8 +9,6 @@ import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.almondtools.picklock.ClassAccess;
-
 public class ClassAccessTest {
 
 	private UnlockedObject unlocked;

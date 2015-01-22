@@ -1,5 +1,7 @@
 package com.almondtools.picklock;
 
+import static com.almondtools.picklock.Converter.determineNeededConversions;
+import static com.almondtools.picklock.Converter.isConverted;
 import static com.almondtools.picklock.SignatureUtil.computeFieldNames;
 import static com.almondtools.picklock.SignatureUtil.containsConvertable;
 import static com.almondtools.picklock.SignatureUtil.fieldSignature;
@@ -42,7 +44,7 @@ public class InvocationResolver {
 	}
 
 	protected MethodInvocationHandler createSetterInvocator(Method method) throws NoSuchFieldException {
-		if (Converter.isConverted(method)) {
+		if (isConverted(method)) {
 			return new ConvertingFieldSetter(findField(propertyOf(method), method.getParameterTypes()[0], method.getParameterAnnotations()[0]), method.getParameterTypes()[0]);
 		} else {
 			return new FieldSetter(findField(propertyOf(method), method.getParameterTypes()[0], new Annotation[0]));
@@ -50,7 +52,7 @@ public class InvocationResolver {
 	}
 
 	protected MethodInvocationHandler createGetterInvocator(Method method) throws NoSuchFieldException {
-		if (Converter.isConverted(method)) {
+		if (isConverted(method)) {
 			return new ConvertingFieldGetter(findField(propertyOf(method), method.getReturnType(), method.getAnnotations()), method.getReturnType());
 		} else {
 			return new FieldGetter(findField(propertyOf(method), method.getReturnType(), new Annotation[0]));
@@ -84,7 +86,7 @@ public class InvocationResolver {
 		Class<?> currentClass = this.innerClass;
 		while (currentClass != Object.class) {
 			try {
-				if (Converter.isConverted(method)) {
+				if (isConverted(method)) {
 					Method candidate = findConvertableMethod(method, currentClass);
 					return new ConvertingMethodInvoker(candidate, method);
 				} else {
@@ -98,9 +100,9 @@ public class InvocationResolver {
 		throw new NoSuchMethodException(methodSignature(method.getName(), method.getReturnType(), method.getParameterTypes(), method.getExceptionTypes()));
 	}
 
-	private Method findConvertableMethod(Method method, Class<?> currentClass) throws NoSuchMethodException {
+	private Method findConvertableMethod(Method method, Class<?> clazz) throws NoSuchMethodException {
 		String[] conversionVector = determineNeededConversions(method.getParameterAnnotations(), method.getParameterTypes());
-		for (Method candidate : currentClass.getDeclaredMethods()) {
+		for (Method candidate : clazz.getDeclaredMethods()) {
 			String containsConvertable = containsConvertable(method.getAnnotations(), method.getReturnType());
 			if (matchesSignature(method, candidate, conversionVector, containsConvertable)) {
 				return candidate;
@@ -115,14 +117,6 @@ public class InvocationResolver {
 			return candidate;
 		}
 		throw new NoSuchMethodException();
-	}
-
-	private String[] determineNeededConversions(Annotation[][] parameterAnnotations, Class<?>[] parameterTypes) {
-		String[] convert = new String[parameterAnnotations.length];
-		for (int i = 0; i < parameterAnnotations.length; i++) {
-			convert[i] = containsConvertable(parameterAnnotations[i], parameterTypes[i]);
-		}
-		return convert;
 	}
 
 }

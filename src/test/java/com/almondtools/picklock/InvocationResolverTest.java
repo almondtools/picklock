@@ -10,9 +10,6 @@ import java.lang.reflect.Method;
 
 import org.junit.Test;
 
-import com.almondtools.picklock.Convert;
-import com.almondtools.picklock.InvocationResolver;
-
 @SuppressWarnings("unused")
 public class InvocationResolverTest {
 

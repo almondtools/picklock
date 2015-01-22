@@ -6,9 +6,6 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-import com.almondtools.picklock.StaticGetter;
-import com.almondtools.picklock.StaticSetter;
-
 public class StaticSetterTest {
 	
 	@Test

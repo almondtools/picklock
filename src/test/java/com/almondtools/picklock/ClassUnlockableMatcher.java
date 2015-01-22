@@ -8,8 +8,6 @@ import org.hamcrest.Description;
 import org.hamcrest.SelfDescribing;
 import org.hamcrest.TypeSafeMatcher;
 
-import com.almondtools.picklock.ClassAccess;
-
 public class ClassUnlockableMatcher extends TypeSafeMatcher<Class<?>> {
 
 	private Class<?> interfaceClazz;

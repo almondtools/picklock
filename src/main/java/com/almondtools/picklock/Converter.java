@@ -58,6 +58,14 @@ public class Converter {
 		return propertyPairs;
 	}
 
+	public static String[] determineNeededConversions(Annotation[][] parameterAnnotations, Class<?>[] parameterTypes) {
+		String[] convert = new String[parameterAnnotations.length];
+		for (int i = 0; i < parameterAnnotations.length; i++) {
+			convert[i] = containsConvertable(parameterAnnotations[i], parameterTypes[i]);
+		}
+		return convert;
+	}
+
 	public static Object[] convertArguments(Class<?>[] targetTypes, Class<?>[] methodTypes, Object... args) throws InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException, SecurityException {
 		if (args == null) {
 			args = new Object[0];

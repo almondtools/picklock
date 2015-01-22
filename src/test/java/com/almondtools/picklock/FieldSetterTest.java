@@ -6,9 +6,6 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-import com.almondtools.picklock.FieldGetter;
-import com.almondtools.picklock.FieldSetter;
-
 
 public class FieldSetterTest {
 

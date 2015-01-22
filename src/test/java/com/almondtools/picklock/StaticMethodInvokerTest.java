@@ -7,8 +7,6 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.almondtools.picklock.StaticMethodInvoker;
-
 @SuppressWarnings("unused")
 public class StaticMethodInvokerTest {
 

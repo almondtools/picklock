@@ -7,8 +7,6 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.almondtools.picklock.ConstructorInvoker;
-
 
 @SuppressWarnings("unused")
 public class ConstructorInvokerTest {

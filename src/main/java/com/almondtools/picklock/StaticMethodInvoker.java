@@ -3,6 +3,9 @@ package com.almondtools.picklock;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+/**
+ * Invokes a given static method.
+ */
 public class StaticMethodInvoker implements StaticMethodInvocationHandler {
 
 	private Class<?> type;
