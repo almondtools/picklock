@@ -57,21 +57,6 @@ public class ConverterTest {
 		assertThat(convertArguments(target.getParameterTypes(), method.getParameterTypes(), ObjectAccess.unlock(val).features(SimpleObjectInterface.class)), equalTo(new Object[] { val }));
 	}
 
-	@Test
-	public void testConvertArgumentsConvertingValuesWithoutStandardConstructor() throws Exception {
-		Method method = staticSimpleOtherMethod();
-		Method target = interfaceSimpleOtherMethod();
-		assertThat(convertArguments(target.getParameterTypes(), method.getParameterTypes(), simpleOtherInterface("value")), equalTo(new Object[] { new SimpleOtherObject("value") }));
-	}
-
-	@Test
-	public void testConvertResultConvertingValuesWithoutStandardConstructor() throws Exception {
-		Method method = staticSimpleOtherMethod();
-		Method target = interfaceSimpleOtherMethod();
-		assertThat(convertResult(target.getReturnType(), method.getReturnType(), new SimpleOtherObject("value")), instanceOf(SimpleOtherInterface.class));
-		assertThat(((SimpleOtherInterface) convertResult(target.getReturnType(), method.getReturnType(), new SimpleOtherObject("value"))).getString(), equalTo("value"));
-	}
-
 	private Method staticLongMethod() throws NoSuchMethodException {
 		return ForSimpleObject.class.getDeclaredMethod("longMethod", long.class, String.class);
 	}
@@ -88,31 +73,8 @@ public class ConverterTest {
 		return InterfaceForSimpleObject.class.getDeclaredMethod("simpleObjectMethod", SimpleObjectInterface.class);
 	}
 
-	private Method staticSimpleOtherMethod() throws NoSuchMethodException {
-		return ForSimpleOther.class.getDeclaredMethod("simpleObjectMethod", SimpleOtherObject.class);
-	}
-
-	private Method interfaceSimpleOtherMethod() throws NoSuchMethodException {
-		return InterfaceForSimpleOther.class.getDeclaredMethod("simpleObjectMethod", SimpleOtherInterface.class);
-	}
-
 	private SimpleObjectInterface simpleObjectInterface(final String s) {
 		return new SimpleObjectInterface() {
-
-			@Override
-			public String getString() {
-				return s;
-			}
-
-			@Override
-			public void setString(String s) {
-			}
-			
-		};
-	}
-
-	private SimpleOtherInterface simpleOtherInterface(final String s) {
-		return new SimpleOtherInterface() {
 
 			@Override
 			public String getString() {
@@ -154,26 +116,9 @@ public class ConverterTest {
 		SimpleObjectInterface simpleObjectMethod(SimpleObjectInterface arg0);
 	}
 
-	interface InterfaceForSimpleOther {
-
-		SimpleOtherInterface simpleObjectMethod(SimpleOtherInterface arg0);
-	}
-
 	interface SimpleObjectInterface {
 		String getString();
 		void setString(String s);
-	}
-
-	@Meta(Constructors.class)
-	interface SimpleOtherInterface {
-		String getString();
-		void setString(String s);
-	}
-	
-	interface Constructors {
-		@Mixin
-		SimpleOtherInterface create();
-		SimpleOtherInterface create(String s);
 	}
 
 	@SuppressWarnings("unused")

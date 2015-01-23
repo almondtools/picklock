@@ -1,6 +1,5 @@
 package com.almondtools.picklock;
 
-import static com.almondtools.picklock.SignatureUtil.CONSTRUCTOR;
 import static com.almondtools.picklock.SignatureUtil.containsConvertable;
 import static com.almondtools.picklock.SignatureUtil.isBooleanGetter;
 import static com.almondtools.picklock.SignatureUtil.isGetter;
@@ -135,21 +134,9 @@ public class Converter {
 	}
 
 	private static Object createBaseObject(Class<?> clazz, Class<?> accessibleClass) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-		try {
-			Constructor<?> constructor = clazz.getDeclaredConstructor();
-			constructor.setAccessible(true);
-			return constructor.newInstance();
-		} catch (NoSuchMethodException e) {
-			Meta meta = accessibleClass.getAnnotation(Meta.class);
-			if (meta != null) {
-				Class<?> metaClass = meta.value();
-				Object classObject = ClassAccess.unlock(clazz).features(metaClass);
-				Method method = metaClass.getDeclaredMethod(CONSTRUCTOR);
-				method.setAccessible(true);
-				return method.invoke(classObject);
-			}
-			throw e;
-		}
+		Constructor<?> constructor = clazz.getDeclaredConstructor();
+		constructor.setAccessible(true);
+		return constructor.newInstance();
 	}
 
 	private static List<Method[]> findProperties(Class<?> accessibleClass) {

@@ -7,8 +7,6 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 
 import com.almondtools.picklock.Convert;
-import com.almondtools.picklock.Meta;
-import com.almondtools.picklock.Mixin;
 import com.almondtools.picklock.ObjectAccess;
 
 public class ExampleObjectTest {
@@ -78,14 +76,6 @@ public class ExampleObjectTest {
 		UnlockedExampleOther unlockedExampleObject = ObjectAccess.unlock(exampleObject).features(UnlockedExampleOther.class);
 		InnerStaticOther s = unlockedExampleObject.createInnerStatic();
 		assertThat(unlockedExampleObject.useInnerStatic(s, ""), is(true));
-	}
-
-	@Test
-	public void testInnerStaticClassArgumentNoStandardConstructor() throws Exception {
-		ExampleObject exampleObject = new ExampleObject("state");
-		UnlockedExampleWithConstructorConfig unlockedExampleObject = ObjectAccess.unlock(exampleObject).features(UnlockedExampleWithConstructorConfig.class);
-		assertThat(unlockedExampleObject.useInnerStatic(new InnerStaticWithoutStandardConstructor() {
-		}), is(true));
 	}
 
 	@Test
@@ -168,25 +158,6 @@ public class ExampleObjectTest {
 	}
 
 	interface InnerStaticException {
-	}
-
-	interface UnlockedExampleWithConstructorConfig {
-
-		boolean useInnerStatic(@Convert InnerStaticWithoutStandardConstructor arg);
-
-	}
-
-	@Meta(Constructors.class)
-	interface InnerStaticWithoutStandardConstructor {
-	}
-
-	interface Constructors {
-		@Convert
-		@Mixin
-		InnerStaticWithoutStandardConstructor create();
-
-		@Convert
-		InnerStaticWithoutStandardConstructor create(String s);
 	}
 
 }

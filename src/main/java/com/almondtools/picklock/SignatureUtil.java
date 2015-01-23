@@ -19,10 +19,6 @@ public final class SignatureUtil {
 	private SignatureUtil() {
 	}
 
-	public static boolean isMixin(Method method) {
-		return method.getAnnotation(Mixin.class) != null;
-	}
-
 	public static boolean isConstructor(Method method) {
 		String name = method.getName();
 		return name.equals(CONSTRUCTOR);

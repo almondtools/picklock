@@ -7,7 +7,6 @@ import static com.almondtools.picklock.SignatureUtil.containsConvertable;
 import static com.almondtools.picklock.SignatureUtil.fieldSignature;
 import static com.almondtools.picklock.SignatureUtil.isBooleanGetter;
 import static com.almondtools.picklock.SignatureUtil.isGetter;
-import static com.almondtools.picklock.SignatureUtil.isMixin;
 import static com.almondtools.picklock.SignatureUtil.isSetter;
 import static com.almondtools.picklock.SignatureUtil.matchesSignature;
 import static com.almondtools.picklock.SignatureUtil.methodSignature;
@@ -27,9 +26,6 @@ public class InvocationResolver {
 	}
 
 	protected MethodInvocationHandler findInvocationHandler(Method method) throws NoSuchMethodException {
-		if (isMixin(method)) {
-			return MethodInvocationHandler.NULL;
-		}
 		try {
 			return createMethodInvocator(method);
 		} catch (NoSuchMethodException e) {
