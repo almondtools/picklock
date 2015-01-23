@@ -7,25 +7,19 @@ import java.lang.reflect.Field;
 /**
  * Wraps a static field with read (getter) access.
  */
-public class ConvertingStaticGetter implements StaticMethodInvocationHandler {
+public class ConvertingStaticGetter extends StaticGetter {
 
-	private Class<?> type;
-	private Field field;
 	private Class<?> targetType;
 
 	public ConvertingStaticGetter(Class<?> type, Field field, Class<?> targetType) {
-		this.type = type;
-		this.field = field;
+		super(type, field);
 		this.targetType = targetType;
-		field.setAccessible(true);
 	}
 
 	@Override
 	public Object invoke(Object[] args) throws Throwable {
-		if (args != null && args.length != 0) {
-			throw new IllegalArgumentException("getters can only be invoked with no argument, was " + args.length + " arguments");
-		}
-		return convertResult(targetType, field.getType(), field.get(type));
+		Object result = super.invoke(args);
+		return convertResult(targetType, getField().getType(), result);
 	}
 
 }

@@ -3,49 +3,26 @@ package com.almondtools.picklock;
 import static com.almondtools.picklock.Converter.convertArgument;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 
 /**
  * Wraps a field with modification (setter) access. Beyond {@link FieldSetter} this class also converts the argument from a given targetType.
  */
-public class ConvertingFieldSetter implements MethodInvocationHandler {
+public class ConvertingFieldSetter extends FieldSetter {
 
-	private Field field;
 	private Class<?> targetType;
 
 	public ConvertingFieldSetter(Field field, Class<?> targetType) {
-		this.field = field;
+		super(field);
 		this.targetType = targetType;
-		field.setAccessible(true);
-		if (isFinal(field)) {
-			makeNonFinal(field);
-		}
 	}
 
-	private boolean isFinal(Field field) {
-		return (field.getModifiers() & Modifier.FINAL) == Modifier.FINAL;
-	}
-
-	private void makeNonFinal(Field field) {
-		try {
-			Field modifiersField = Field.class.getDeclaredField("modifiers");
-			modifiersField.setAccessible(true);
-			modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-		} catch (Exception e) {
-			// omit this exception
-		}
-	}
 
 	@Override
 	public Object invoke(Object object, Object[] args) throws Throwable {
 		if (args == null || args.length != 1) {
 			throw new IllegalArgumentException("setters can only be invoked with exactly one argument, was " + (args == null ? "null" : String.valueOf(args.length)) + " arguments");
 		}
-		Object arg = convertArgument(targetType, field.getType(), args[0]);
-		if (arg != null && !BoxingUtil.getBoxed(field.getType()).isInstance(arg)) {
-			throw new ClassCastException("defined type of " + field.getName() + " is " + arg.getClass().getSimpleName() + ", but assigned type was " + field.getType().getSimpleName());
-		}
-		field.set(object, arg);
-		return null;
+		args[0] = convertArgument(targetType, getField().getType(), args[0]);
+		return super.invoke(object, args);
 	}
 }

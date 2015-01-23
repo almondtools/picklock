@@ -13,6 +13,10 @@ public class FieldGetter implements MethodInvocationHandler {
 		this.field = field;
 		field.setAccessible(true);
 	}
+	
+	public Field getField() {
+		return field;
+	}
 
 	@Override
 	public Object invoke(Object object, Object[] args) throws Throwable {

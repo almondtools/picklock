@@ -14,6 +14,10 @@ public class MethodInvoker implements MethodInvocationHandler {
 		this.method = method;
 		method.setAccessible(true);
 	}
+	
+	public Method getMethod() {
+		return method;
+	}
 
 	@Override
 	public Object invoke(Object object, Object[] args) throws Throwable {

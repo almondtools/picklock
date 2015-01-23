@@ -22,6 +22,10 @@ public class ConstructorInvoker implements StaticMethodInvocationHandler {
 	private static Constructor<?> defaultConstructor(Class<?> clazz) throws NoSuchMethodException {
 		return clazz.getDeclaredConstructor(new Class[0]);
 	}
+	
+	public Constructor<?> getConstructor() {
+		return constructor;
+	}
 
 	@Override
 	public Object invoke(Object[] args) throws Throwable {

@@ -17,6 +17,10 @@ public class FieldSetter implements MethodInvocationHandler {
 			makeNonFinal(field);
 		}
 	}
+	
+	public Field getField() {
+		return field;
+	}
 
 	private boolean isFinal(Field field) {
 		return (field.getModifiers() & Modifier.FINAL) == Modifier.FINAL;

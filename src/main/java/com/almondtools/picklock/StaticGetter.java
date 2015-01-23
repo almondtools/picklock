@@ -15,6 +15,10 @@ public class StaticGetter implements StaticMethodInvocationHandler {
 		this.field = field;
 		field.setAccessible(true);
 	}
+	
+	public Field getField() {
+		return field;
+	}
 
 	@Override
 	public Object invoke(Object[] args) throws Throwable {

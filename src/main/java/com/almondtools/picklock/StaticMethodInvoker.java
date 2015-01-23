@@ -16,6 +16,10 @@ public class StaticMethodInvoker implements StaticMethodInvocationHandler {
 		this.method = method;
 		method.setAccessible(true);
 	}
+	
+	public Method getMethod() {
+		return method;
+	}
 
 	@Override
 	public Object invoke(Object[] args) throws Throwable {

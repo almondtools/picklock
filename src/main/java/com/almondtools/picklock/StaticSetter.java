@@ -22,6 +22,10 @@ public class StaticSetter implements StaticMethodInvocationHandler {
 			makeNonFinal(field);
 		}
 	}
+	
+	public Field getField() {
+		return field;
+	}
 
 	private boolean isFinal(Field field) {
 		return (field.getModifiers() & Modifier.FINAL) == Modifier.FINAL;
