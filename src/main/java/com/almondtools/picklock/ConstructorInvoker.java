@@ -47,7 +47,7 @@ public class ConstructorInvoker implements StaticMethodInvocationHandler {
 	}
 
 	@Override
-	public Object invoke(Object[] args) throws Throwable {
+	public Object invoke(Object... args) throws Throwable {
 		try {
 			return r(constructor.newInstance(a(args)));
 		} catch (InvocationTargetException e) {

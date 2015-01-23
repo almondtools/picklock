@@ -39,7 +39,7 @@ public class StaticMethodInvoker implements StaticMethodInvocationHandler {
 	}
 
 	@Override
-	public Object invoke(Object[] args) throws Throwable {
+	public Object invoke(Object... args) throws Throwable {
 		try {
 			return r(method.invoke(type, a(args)));
 		} catch (InvocationTargetException e) {

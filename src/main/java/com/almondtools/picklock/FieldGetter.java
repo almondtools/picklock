@@ -33,7 +33,7 @@ public class FieldGetter implements MethodInvocationHandler {
 	}
 
 	@Override
-	public Object invoke(Object object, Object[] args) throws Throwable {
+	public Object invoke(Object object, Object... args) throws Throwable {
 		if (args != null && args.length != 0) {
 			throw new IllegalArgumentException("getters can only be invoked with no argument, was " + args.length + " arguments");
 		}

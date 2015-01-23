@@ -3,7 +3,7 @@ package com.almondtools.picklock;
 import static com.almondtools.picklock.Converter.determineNeededConversions;
 import static com.almondtools.picklock.Converter.isConverted;
 import static com.almondtools.picklock.SignatureUtil.computeFieldNames;
-import static com.almondtools.picklock.SignatureUtil.containsConvertable;
+import static com.almondtools.picklock.SignatureUtil.findTargetTypeName;
 import static com.almondtools.picklock.SignatureUtil.fieldSignature;
 import static com.almondtools.picklock.SignatureUtil.isBooleanGetter;
 import static com.almondtools.picklock.SignatureUtil.isGetter;
@@ -69,7 +69,7 @@ public class InvocationResolver {
 	}
 
 	protected Field findField(String fieldPattern, Class<?> type, Annotation[] annotations) throws NoSuchFieldException {
-		String convert = containsConvertable(annotations, type);
+		String convert = findTargetTypeName(annotations, type);
 		List<String> fieldNames = computeFieldNames(fieldPattern);
 		Class<?> currentClass = this.innerClass;
 		while (currentClass != Object.class) {
@@ -95,13 +95,7 @@ public class InvocationResolver {
 		Class<?> currentClass = this.innerClass;
 		while (currentClass != Object.class) {
 			try {
-				if (isConverted(method)) {
-					Method candidate = findConvertableMethod(method, currentClass);
-					return new MethodInvoker(candidate, method);
-				} else {
-					Method candidate = findMatchingMethod(method, currentClass);
-					return new MethodInvoker(candidate);
-				}
+				return new MethodInvoker(findMethod(method, currentClass), findConversionTarget(method));
 			} catch (NoSuchMethodException e) {
 			}
 			currentClass = currentClass.getSuperclass();
@@ -109,10 +103,26 @@ public class InvocationResolver {
 		throw new NoSuchMethodException(methodSignature(method.getName(), method.getReturnType(), method.getParameterTypes(), method.getExceptionTypes()));
 	}
 
+	private Method findMethod(Method method, Class<?> clazz) throws NoSuchMethodException {
+		if (isConverted(method)) {
+			return findConvertableMethod(method, clazz);
+		} else {
+			return findMatchingMethod(method, clazz);
+		}
+	}
+
+	private Method findConversionTarget(Method method) {
+		if (isConverted(method)) {
+			return method;
+		} else {
+			return null;
+		}
+	}
+
 	private Method findConvertableMethod(Method method, Class<?> clazz) throws NoSuchMethodException {
 		String[] conversionVector = determineNeededConversions(method.getParameterAnnotations(), method.getParameterTypes());
 		for (Method candidate : clazz.getDeclaredMethods()) {
-			String containsConvertable = containsConvertable(method.getAnnotations(), method.getReturnType());
+			String containsConvertable = findTargetTypeName(method.getAnnotations(), method.getReturnType());
 			if (matchesSignature(method, candidate, conversionVector, containsConvertable)) {
 				return candidate;
 			}

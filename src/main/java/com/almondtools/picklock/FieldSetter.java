@@ -52,7 +52,7 @@ public class FieldSetter implements MethodInvocationHandler {
 	}
 
 	@Override
-	public Object invoke(Object object, Object[] args) throws Throwable {
+	public Object invoke(Object object, Object... args) throws Throwable {
 		if (args == null || args.length != 1) {
 			throw new IllegalArgumentException("setters can only be invoked with exactly one argument, was " + (args == null ? "null" : String.valueOf(args.length)) + " arguments");
 		}

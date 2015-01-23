@@ -1,6 +1,6 @@
 package com.almondtools.picklock;
 
-import static com.almondtools.picklock.SignatureUtil.containsConvertable;
+import static com.almondtools.picklock.SignatureUtil.findTargetTypeName;
 import static com.almondtools.picklock.SignatureUtil.isBooleanGetter;
 import static com.almondtools.picklock.SignatureUtil.isGetter;
 import static com.almondtools.picklock.SignatureUtil.isSetter;
@@ -61,7 +61,7 @@ public class Converter {
 	public static String[] determineNeededConversions(Annotation[][] parameterAnnotations, Class<?>[] parameterTypes) {
 		String[] convert = new String[parameterAnnotations.length];
 		for (int i = 0; i < parameterAnnotations.length; i++) {
-			convert[i] = containsConvertable(parameterAnnotations[i], parameterTypes[i]);
+			convert[i] = findTargetTypeName(parameterAnnotations[i], parameterTypes[i]);
 		}
 		return convert;
 	}
@@ -105,7 +105,7 @@ public class Converter {
 		for (int i = 0; i < parameterTypes.length; i++) {
 			Class<?> parameterType = parameterTypes[i];
 			Annotation[] annotations = parameterAnnotations[i];
-			if (containsConvertable(annotations, parameterType) != null) {
+			if (findTargetTypeName(annotations, parameterType) != null) {
 				return true;
 			}
 		}

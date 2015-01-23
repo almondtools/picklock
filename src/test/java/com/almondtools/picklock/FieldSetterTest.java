@@ -25,7 +25,7 @@ public class FieldSetterTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testSetFieldFailingSignatureNull() throws Throwable {
 		WithField object = new WithField();
-		new FieldSetter(WithField.class.getDeclaredField("field")).invoke(object, null);
+		new FieldSetter(WithField.class.getDeclaredField("field")).invoke(object, (Object[]) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -75,7 +75,7 @@ public class FieldSetterTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConvertingSetFieldFailingSignatureNull() throws Throwable {
 		ConvertingWithField object = new ConvertingWithField();
-		new FieldSetter(ConvertingWithField.class.getDeclaredField("field"), ConvertingInterface.class).invoke(object, null);
+		new FieldSetter(ConvertingWithField.class.getDeclaredField("field"), ConvertingInterface.class).invoke(object, (Object[]) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
