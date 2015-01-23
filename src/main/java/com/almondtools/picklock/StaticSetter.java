@@ -1,6 +1,9 @@
 package com.almondtools.picklock;
 
+import static com.almondtools.picklock.Converter.convertArgument;
+
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
 /**
@@ -13,7 +16,13 @@ public class StaticSetter implements StaticMethodInvocationHandler {
 
 	private Class<?> type;
 	private Field field;
+	private Class<?> target;
 
+	/**
+	 * Sets a value on the given field.
+	 * @param type the static type of the field to access
+	 * @param field the field to access
+	 */
 	public StaticSetter(Class<?> type, Field field) {
 		this.type = type;
 		this.field = field;
@@ -23,8 +32,16 @@ public class StaticSetter implements StaticMethodInvocationHandler {
 		}
 	}
 	
-	public Field getField() {
-		return field;
+	/**
+	 * Sets a value on the given field. Beyond {@link #StaticSetter(Class, Field)} this constructor also converts the argument
+	 * @param type the static type of the field to access
+	 * @param field the field to access
+	 * @param target the target signature (source arguments)
+	 * @see Convert 
+	 */
+	public StaticSetter(Class<?> type, Field field, Class<?> target) {
+		this(type, field);
+		this.target = target;
 	}
 
 	private boolean isFinal(Field field) {
@@ -49,8 +66,15 @@ public class StaticSetter implements StaticMethodInvocationHandler {
 		if (args[0] != null && !BoxingUtil.getBoxed(field.getType()).isInstance(args[0])) {
 			throw new ClassCastException("defined type of " + field.getName() + " is " + args[0].getClass().getSimpleName() + ", but assigned type was " + field.getType().getSimpleName());
 		}
-		field.set(type, args[0]);
+		field.set(type, a(args[0]));
 		return null;
+	}
+
+	private Object a(Object arg) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+		if (target == null) {
+			return arg;
+		}
+		return convertArgument(target, field.getType(), arg);
 	}
 
 }

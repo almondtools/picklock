@@ -45,7 +45,7 @@ public class InvocationResolver {
 
 	protected MethodInvocationHandler createSetterInvocator(Method method) throws NoSuchFieldException {
 		if (isConverted(method)) {
-			return new ConvertingFieldSetter(findField(propertyOf(method), method.getParameterTypes()[0], method.getParameterAnnotations()[0]), method.getParameterTypes()[0]);
+			return new FieldSetter(findField(propertyOf(method), method.getParameterTypes()[0], method.getParameterAnnotations()[0]), method.getParameterTypes()[0]);
 		} else {
 			return new FieldSetter(findField(propertyOf(method), method.getParameterTypes()[0], new Annotation[0]));
 		}
@@ -53,7 +53,7 @@ public class InvocationResolver {
 
 	protected MethodInvocationHandler createGetterInvocator(Method method) throws NoSuchFieldException {
 		if (isConverted(method)) {
-			return new ConvertingFieldGetter(findField(propertyOf(method), method.getReturnType(), method.getAnnotations()), method.getReturnType());
+			return new FieldGetter(findField(propertyOf(method), method.getReturnType(), method.getAnnotations()), method.getReturnType());
 		} else {
 			return new FieldGetter(findField(propertyOf(method), method.getReturnType(), new Annotation[0]));
 		}
@@ -88,7 +88,7 @@ public class InvocationResolver {
 			try {
 				if (isConverted(method)) {
 					Method candidate = findConvertableMethod(method, currentClass);
-					return new ConvertingMethodInvoker(candidate, method);
+					return new MethodInvoker(candidate, method);
 				} else {
 					Method candidate = findMatchingMethod(method, currentClass);
 					return new MethodInvoker(candidate);

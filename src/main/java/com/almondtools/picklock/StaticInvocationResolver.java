@@ -53,7 +53,7 @@ public class StaticInvocationResolver {
 			try {
 				if (isConverted(method)) {
 					Method candidate = findConvertableMethod(method, currentClass);
-					return new ConvertingStaticMethodInvoker(currentClass, candidate, method);
+					return new StaticMethodInvoker(currentClass, candidate, method);
 				} else {
 					Method canditate = findMatchingMethod(method, currentClass);
 					return new StaticMethodInvoker(currentClass, canditate);
@@ -68,7 +68,7 @@ public class StaticInvocationResolver {
 	protected StaticMethodInvocationHandler createConstructorInvocator(Method method) throws NoSuchMethodException {
 		if (isConverted(method)) {
 			Constructor<?> constructor = findConvertableConstructor(method, type);
-			return new ConvertingConstructorInvoker(constructor, method);
+			return new ConstructorInvoker(constructor, method);
 		} else {
 			Constructor<?> constructor = findMatchingConstructor(method, type);
 			return new ConstructorInvoker(constructor);
@@ -77,7 +77,7 @@ public class StaticInvocationResolver {
 
 	protected StaticMethodInvocationHandler createGetterInvocator(Method method) throws NoSuchFieldException {
 		if (isConverted(method)) {
-			return new ConvertingStaticGetter(type, findField(propertyOf(method), method.getReturnType(), method.getAnnotations()), method.getReturnType());
+			return new StaticGetter(type, findField(propertyOf(method), method.getReturnType(), method.getAnnotations()), method.getReturnType());
 		} else {
 			return new StaticGetter(type, findField(propertyOf(method), method.getReturnType(), new Annotation[0]));
 		}
@@ -85,7 +85,7 @@ public class StaticInvocationResolver {
 
 	protected StaticMethodInvocationHandler createSetterInvocator(Method method) throws NoSuchFieldException {
 		if (isConverted(method)) {
-			return new ConvertingStaticSetter(type, findField(propertyOf(method), method.getParameterTypes()[0], method.getParameterAnnotations()[0]), method.getParameterTypes()[0]);
+			return new StaticSetter(type, findField(propertyOf(method), method.getParameterTypes()[0], method.getParameterAnnotations()[0]), method.getParameterTypes()[0]);
 		} else {
 			return new StaticSetter(type, findField(propertyOf(method), method.getParameterTypes()[0], new Annotation[0]));
 		}
