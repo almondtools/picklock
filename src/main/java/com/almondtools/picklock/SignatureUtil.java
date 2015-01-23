@@ -21,7 +21,9 @@ public final class SignatureUtil {
 
 	public static boolean isConstructor(Method method) {
 		String name = method.getName();
-		return name.equals(CONSTRUCTOR);
+		return name.equals(CONSTRUCTOR)
+			&& method.getReturnType() != void.class
+			&& !method.getReturnType().isPrimitive();
 	}
 
 	public static boolean isBooleanGetter(Method method) {
@@ -148,7 +150,7 @@ public final class SignatureUtil {
 			buffer.append(typeName(exceptionTypes[0]));
 		}
 		for (int i = 1; i < exceptionTypes.length; i++) {
-			buffer.append(',').append(typeName(exceptionTypes[i]));
+			buffer.append(", ").append(typeName(exceptionTypes[i]));
 		}
 		return buffer.toString();
 	}
@@ -195,11 +197,11 @@ public final class SignatureUtil {
 		return candidateType.equals(requiredType) || candidateType.getSimpleName().equals(annotatedName);
 	}
 
-	public static String containsConvertable(Annotation[] annotations, Class<?> defaultType) {
+	public static String findTargetTypeName(Annotation[] annotations, Class<?> defaultType) {
 		for (Annotation annotation : annotations) {
 			if (annotation.annotationType() == Convert.class) {
-				Convert convertable = (Convert) annotation;
-				String name = convertable.value();
+				Convert convertible = (Convert) annotation;
+				String name = convertible.value();
 				if (name.isEmpty()) {
 					return defaultType.getSimpleName();
 				} else {

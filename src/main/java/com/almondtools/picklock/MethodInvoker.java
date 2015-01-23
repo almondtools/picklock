@@ -35,7 +35,7 @@ public class MethodInvoker implements MethodInvocationHandler {
 	}
 
 	@Override
-	public Object invoke(Object object, Object[] args) throws Throwable {
+	public Object invoke(Object object, Object... args) throws Throwable {
 		try {
 			return r(method.invoke(object, a(args)));
 		} catch (InvocationTargetException e) {

@@ -31,6 +31,13 @@ public class InvocationResolverTest {
 	}
 
 	@Test
+	public void testCreateGetterInvocatorConverted() throws Exception {
+		InvocationResolver resolver = new InvocationResolver(ConvertibleTestClass.class);
+		Method[] getters = ConvertibleGetters.class.getDeclaredMethods();
+		assertThat(resolver.createGetterInvocator(getters[0]), notNullValue());
+	}
+
+	@Test
 	public void testCreateSetterInvocator() throws Exception {
 		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
 		Method[] setters = Setters.class.getDeclaredMethods();
@@ -39,14 +46,21 @@ public class InvocationResolverTest {
 		assertThat(resolver.createSetterInvocator(setters[2]), notNullValue());
 	}
 
-	@Test(expected=NoSuchFieldException.class)
+	@Test
+	public void testCreateSetterInvocatorConverted() throws Exception {
+		InvocationResolver resolver = new InvocationResolver(ConvertibleTestClass.class);
+		Method[] convsetters = ConvertibleSetters.class.getDeclaredMethods();
+		assertThat(resolver.createSetterInvocator(convsetters[0]), notNullValue());
+	}
+
+	@Test(expected = NoSuchFieldException.class)
 	public void testCreateGetterInvocatorFails() throws Exception {
 		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
 		Method[] getters = BadGetters.class.getDeclaredMethods();
 		resolver.createGetterInvocator(getters[0]);
 	}
 
-	@Test(expected=NoSuchFieldException.class)
+	@Test(expected = NoSuchFieldException.class)
 	public void testCreateSetterInvocatorFails() throws Exception {
 		InvocationResolver resolver = new InvocationResolver(TestSubClass.class);
 		Method[] setters = BadSetters.class.getDeclaredMethods();
@@ -85,8 +99,8 @@ public class InvocationResolverTest {
 
 	@Test
 	public void testCreateMethodInvocatorWithConversion() throws Exception {
-		InvocationResolver resolver = new InvocationResolver(ConvertableTestClass.class);
-		Method[] methods = ConvertableMethods.class.getDeclaredMethods();
+		InvocationResolver resolver = new InvocationResolver(ConvertibleTestClass.class);
+		Method[] methods = ConvertibleMethods.class.getDeclaredMethods();
 		assertThat(methods.length, equalTo(2));
 		assertThat(resolver.createMethodInvocator(methods[0]), notNullValue());
 		assertThat(resolver.createMethodInvocator(methods[1]), notNullValue());
@@ -135,45 +149,58 @@ public class InvocationResolverTest {
 	}
 
 	@Test(expected = NoSuchMethodException.class)
-	public void testCreateMethodInvocatorNotConvertableArguments() throws Exception {
-		InvocationResolver resolver = new InvocationResolver(ConvertableTestClass.class);
-		Method[] badmethods = NonConvertableMethods.class.getDeclaredMethods();
+	public void testCreateMethodInvocatorNotConvertibleArguments() throws Exception {
+		InvocationResolver resolver = new InvocationResolver(ConvertibleTestClass.class);
+		Method[] badmethods = NonConvertibleMethods.class.getDeclaredMethods();
 		resolver.createMethodInvocator(badmethods[0]);
 	}
 
 	@Test(expected = NoSuchMethodException.class)
-	public void testCreateMethodInvocatorNotConvertableResult() throws Exception {
-		InvocationResolver resolver = new InvocationResolver(ConvertableTestClass.class);
-		Method[] badmethods = NonConvertableMethods.class.getDeclaredMethods();
+	public void testCreateMethodInvocatorNotConvertibleResult() throws Exception {
+		InvocationResolver resolver = new InvocationResolver(ConvertibleTestClass.class);
+		Method[] badmethods = NonConvertibleMethods.class.getDeclaredMethods();
 		resolver.createMethodInvocator(badmethods[1]);
 	}
 
 	@Test(expected = NoSuchMethodException.class)
-	public void testCreateMethodInvocatorFailedConvertableArguments() throws Exception {
-		InvocationResolver resolver = new InvocationResolver(ConvertableTestClass.class);
-		Method[] badmethods = FailedConvertableMethods.class.getDeclaredMethods();
+	public void testCreateMethodInvocatorFailedConvertibleArguments() throws Exception {
+		InvocationResolver resolver = new InvocationResolver(ConvertibleTestClass.class);
+		Method[] badmethods = FailedConvertibleMethods.class.getDeclaredMethods();
 		resolver.createMethodInvocator(badmethods[0]);
 	}
 
 	@Test(expected = NoSuchMethodException.class)
-	public void testCreateMethodInvocatorFailedConvertableResult() throws Exception {
-		InvocationResolver resolver = new InvocationResolver(ConvertableTestClass.class);
-		Method[] badmethods = FailedConvertableMethods.class.getDeclaredMethods();
+	public void testCreateMethodInvocatorFailedConvertibleResult() throws Exception {
+		InvocationResolver resolver = new InvocationResolver(ConvertibleTestClass.class);
+		Method[] badmethods = FailedConvertibleMethods.class.getDeclaredMethods();
 		resolver.createMethodInvocator(badmethods[1]);
 	}
 
 	interface Getters {
 		String getS();
+
 		int getI();
+
 		boolean getB();
 	}
 
 	interface Setters {
 		void setS(String s);
+
 		void setI(int i);
+
 		void setB(boolean b);
 	}
-	
+
+	interface ConvertibleSetters {
+		void setConvertible(@Convert("ConvertibleObject") ConvertibleInterface o);
+	}
+
+	interface ConvertibleGetters {
+		@Convert("ConvertibleObject")
+		ConvertibleInterface getConvertible();
+	}
+
 	interface BadGetters {
 		String getA();
 	}
@@ -181,7 +208,7 @@ public class InvocationResolverTest {
 	interface BadSetters {
 		void setA(boolean b);
 	}
-	
+
 	interface Methods {
 		void methoda();
 
@@ -208,30 +235,30 @@ public class InvocationResolverTest {
 		String methode(String s) throws IOException;
 	}
 
-	interface ConvertableMethods {
+	interface ConvertibleMethods {
 
-		void methoda(@Convert("ConvertableObject") ConvertableInterface o);
+		void methoda(@Convert("ConvertibleObject") ConvertibleInterface o);
 
-		@Convert("ConvertableObject")
-		ConvertableInterface methodb();
+		@Convert("ConvertibleObject")
+		ConvertibleInterface methodb();
 	}
 
-	interface NonConvertableMethods {
+	interface NonConvertibleMethods {
 
-		void methoda(ConvertableInterface o);
+		void methoda(ConvertibleInterface o);
 
-		ConvertableInterface methodb();
+		ConvertibleInterface methodb();
 	}
 
-	interface FailedConvertableMethods {
+	interface FailedConvertibleMethods {
 
-		void methoda(@Convert ConvertableInterface o);
+		void methoda(@Convert ConvertibleInterface o);
 
 		@Convert
-		ConvertableInterface methodb();
+		ConvertibleInterface methodb();
 	}
 
-	interface ConvertableInterface {
+	interface ConvertibleInterface {
 		String getContent();
 	}
 
@@ -265,17 +292,19 @@ public class InvocationResolverTest {
 		}
 	}
 
-	private static class ConvertableTestClass {
+	private static class ConvertibleTestClass {
 
-		private void methoda(ConvertableObject o) {
+		private ConvertibleObject convertible;
+
+		private void methoda(ConvertibleObject o) {
 		}
 
-		private ConvertableObject methodb() {
+		private ConvertibleObject methodb() {
 			return null;
 		}
 	}
 
-	private static class ConvertableObject {
+	private static class ConvertibleObject {
 		private String content = "content";
 	}
 

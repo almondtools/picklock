@@ -25,7 +25,7 @@ public class FieldSetterTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testSetFieldFailingSignatureNull() throws Throwable {
 		WithField object = new WithField();
-		new FieldSetter(WithField.class.getDeclaredField("field")).invoke(object, null);
+		new FieldSetter(WithField.class.getDeclaredField("field")).invoke(object, (Object[]) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -75,7 +75,7 @@ public class FieldSetterTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConvertingSetFieldFailingSignatureNull() throws Throwable {
 		ConvertingWithField object = new ConvertingWithField();
-		new FieldSetter(ConvertingWithField.class.getDeclaredField("field"), ConvertingInterface.class).invoke(object, null);
+		new FieldSetter(ConvertingWithField.class.getDeclaredField("field"), ConvertingInterface.class).invoke(object, (Object[]) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -91,7 +91,7 @@ public class FieldSetterTest {
 	}
 
 	@Test
-	public void testConvertingSetFieldNonConvertable() throws Throwable {
+	public void testConvertingSetFieldNonConvertible() throws Throwable {
 		ConvertingWithField object = new ConvertingWithField();
 		Object result = new FieldSetter(ConvertingWithField.class.getDeclaredField("other"), String.class).invoke(object, new Object[] { "hello" });
 		assertThat(result, nullValue());
@@ -130,19 +130,19 @@ public class FieldSetterTest {
 	private static class ConvertingWithField {
 
 		public String other = "hello";
-		public ConvertableField field = new ConvertableField();
+		public ConvertibleField field = new ConvertibleField();
 	}
 
 	private static class ConvertingWithFinalField {
 
-		public final ConvertableField finalfield = new ConvertableField();
+		public final ConvertibleField finalfield = new ConvertibleField();
 	}
 
-	private static class ConvertableField {
+	private static class ConvertibleField {
 
 		public String content = "world";
 
-		public ConvertableField() {
+		public ConvertibleField() {
 		}
 
 	}

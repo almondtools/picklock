@@ -22,7 +22,7 @@ public class StaticSetterTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testSetFieldFailingSignatureNull() throws Throwable {
-		new StaticSetter(WithField.class, WithField.class.getDeclaredField("field")).invoke(null);
+		new StaticSetter(WithField.class, WithField.class.getDeclaredField("field")).invoke((Object[]) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)

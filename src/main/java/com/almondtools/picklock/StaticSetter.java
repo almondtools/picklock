@@ -59,7 +59,7 @@ public class StaticSetter implements StaticMethodInvocationHandler {
 	}
 
 	@Override
-	public Object invoke(Object[] args) throws Throwable {
+	public Object invoke(Object... args) throws Throwable {
 		if (args == null || args.length != 1) {
 			throw new IllegalArgumentException("setters can only be invoked with exactly one argument, was " + (args == null ? "null" : String.valueOf(args.length)) + " arguments");
 		}

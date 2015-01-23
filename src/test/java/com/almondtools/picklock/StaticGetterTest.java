@@ -22,7 +22,7 @@ public class StaticGetterTest {
 
 	@Test
 	public void testGetFieldWithFailingSignatureNull() throws Throwable {
-		Object result = new StaticGetter(WithField.class, WithField.class.getDeclaredField("field")).invoke(null);
+		Object result = new StaticGetter(WithField.class, WithField.class.getDeclaredField("field")).invoke((Object[]) null);
 		assertThat((String) result, equalTo("world"));
 	}
 
