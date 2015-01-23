@@ -10,7 +10,9 @@ import static com.almondtools.picklock.SignatureUtil.isGetter;
 import static com.almondtools.picklock.SignatureUtil.isSetter;
 import static com.almondtools.picklock.SignatureUtil.matchesSignature;
 import static com.almondtools.picklock.SignatureUtil.methodSignature;
+import static com.almondtools.picklock.SignatureUtil.propertyAnnotationsOf;
 import static com.almondtools.picklock.SignatureUtil.propertyOf;
+import static com.almondtools.picklock.SignatureUtil.propertyTypeOf;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -44,18 +46,25 @@ public class InvocationResolver {
 	}
 
 	protected MethodInvocationHandler createSetterInvocator(Method method) throws NoSuchFieldException {
-		if (isConverted(method)) {
-			return new FieldSetter(findField(propertyOf(method), method.getParameterTypes()[0], method.getParameterAnnotations()[0]), method.getParameterTypes()[0]);
-		} else {
-			return new FieldSetter(findField(propertyOf(method), method.getParameterTypes()[0], new Annotation[0]));
-		}
+		return new FieldSetter(findField(method), convertedPropertyTypeOf(method));
 	}
 
 	protected MethodInvocationHandler createGetterInvocator(Method method) throws NoSuchFieldException {
+		return new FieldGetter(findField(method), convertedPropertyTypeOf(method));
+	}
+
+	private Class<?> convertedPropertyTypeOf(Method method) {
+		if (!isConverted(method)) {
+			return null;
+		}
+		return propertyTypeOf(method);
+	}
+
+	private Field findField(Method method) throws NoSuchFieldException {
 		if (isConverted(method)) {
-			return new FieldGetter(findField(propertyOf(method), method.getReturnType(), method.getAnnotations()), method.getReturnType());
+			return findField(propertyOf(method), propertyTypeOf(method), propertyAnnotationsOf(method));
 		} else {
-			return new FieldGetter(findField(propertyOf(method), method.getReturnType(), new Annotation[0]));
+			return findField(propertyOf(method), propertyTypeOf(method), new Annotation[0]);
 		}
 	}
 

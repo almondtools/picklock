@@ -10,7 +10,9 @@ import static com.almondtools.picklock.SignatureUtil.isGetter;
 import static com.almondtools.picklock.SignatureUtil.isSetter;
 import static com.almondtools.picklock.SignatureUtil.matchesSignature;
 import static com.almondtools.picklock.SignatureUtil.methodSignature;
+import static com.almondtools.picklock.SignatureUtil.propertyAnnotationsOf;
 import static com.almondtools.picklock.SignatureUtil.propertyOf;
+import static com.almondtools.picklock.SignatureUtil.propertyTypeOf;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -76,18 +78,25 @@ public class StaticInvocationResolver {
 	}
 
 	protected StaticMethodInvocationHandler createGetterInvocator(Method method) throws NoSuchFieldException {
-		if (isConverted(method)) {
-			return new StaticGetter(type, findField(propertyOf(method), method.getReturnType(), method.getAnnotations()), method.getReturnType());
-		} else {
-			return new StaticGetter(type, findField(propertyOf(method), method.getReturnType(), new Annotation[0]));
-		}
+		return new StaticGetter(type, findField(method), convertedPropertyTypeOf(method));
 	}
 
 	protected StaticMethodInvocationHandler createSetterInvocator(Method method) throws NoSuchFieldException {
+		return new StaticSetter(type, findField(method), convertedPropertyTypeOf(method));
+	}
+
+	private Class<?> convertedPropertyTypeOf(Method method) {
+		if (!isConverted(method)) {
+			return null;
+		}
+		return propertyTypeOf(method);
+	}
+
+	private Field findField(Method method) throws NoSuchFieldException {
 		if (isConverted(method)) {
-			return new StaticSetter(type, findField(propertyOf(method), method.getParameterTypes()[0], method.getParameterAnnotations()[0]), method.getParameterTypes()[0]);
+			return findField(propertyOf(method), propertyTypeOf(method), propertyAnnotationsOf(method));
 		} else {
-			return new StaticSetter(type, findField(propertyOf(method), method.getParameterTypes()[0], new Annotation[0]));
+			return findField(propertyOf(method), propertyTypeOf(method), new Annotation[0]);
 		}
 	}
 

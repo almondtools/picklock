@@ -71,6 +71,26 @@ public final class SignatureUtil {
 		}
 	}
 
+	public static Class<?> propertyTypeOf(Method method) {
+		if (isSetter(method)) {
+			return method.getParameterTypes()[0];
+		} else if (isGetter(method) || isBooleanGetter(method)) {
+			return method.getReturnType();
+		} else {
+			return null;
+		}
+	}
+
+	public static Annotation[] propertyAnnotationsOf(Method method) {
+		if (isSetter(method)) {
+			return method.getParameterAnnotations()[0];
+		} else if (isGetter(method) || isBooleanGetter(method)) {
+			return method.getAnnotations();
+		} else {
+			return null;
+		}
+	}
+
 	public static List<String> computeFieldNames(String fieldPattern) {
 		List<String> names = new ArrayList<String>(2);
 		if (fieldPattern.toUpperCase().equals(fieldPattern)) {
