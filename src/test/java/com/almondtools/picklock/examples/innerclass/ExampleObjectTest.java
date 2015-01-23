@@ -7,6 +7,8 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 
 import com.almondtools.picklock.Convert;
+import com.almondtools.picklock.Meta;
+import com.almondtools.picklock.Mixin;
 import com.almondtools.picklock.ObjectAccess;
 
 public class ExampleObjectTest {
@@ -30,7 +32,7 @@ public class ExampleObjectTest {
 			public boolean isBooleanState() {
 				return false;
 			}
-			
+
 			@Override
 			public String getState() {
 				return null;
@@ -39,14 +41,14 @@ public class ExampleObjectTest {
 			@Override
 			public void setState(String state) {
 			}
-		},""), is(false));
+		}, ""), is(false));
 		assertThat(unlockedExampleObject.useInnerStatic(new InnerStatic() {
 
 			@Override
 			public boolean isBooleanState() {
 				return false;
 			}
-			
+
 			@Override
 			public String getState() {
 				return "state";
@@ -55,16 +57,16 @@ public class ExampleObjectTest {
 			@Override
 			public void setState(String state) {
 			}
-		},""), is(true));
+		}, ""), is(true));
 	}
 
-	@Test(expected=NoSuchMethodException.class)
+	@Test(expected = NoSuchMethodException.class)
 	public void testInnerStaticMappingExceptionOnResult() throws Exception {
 		ExampleObject exampleObject = new ExampleObject("state");
 		ObjectAccess.unlock(exampleObject).features(UnlockedExampleExceptionResult.class);
 	}
 
-	@Test(expected=NoSuchMethodException.class)
+	@Test(expected = NoSuchMethodException.class)
 	public void testInnerStaticMappingExceptionOnParams() throws Exception {
 		ExampleObject exampleObject = new ExampleObject("state");
 		ObjectAccess.unlock(exampleObject).features(UnlockedExampleExceptionParam.class);
@@ -112,7 +114,7 @@ public class ExampleObjectTest {
 			@Override
 			public void setState(String state) {
 			}
-			
+
 		});
 		assertThat(unlockedExampleObject.getFieldInnerStatic().getState(), equalTo("newState"));
 	}
@@ -126,7 +128,7 @@ public class ExampleObjectTest {
 	}
 
 	interface UnlockedExampleGetSetter {
-		
+
 		@Convert
 		InnerStatic getFieldInnerStatic();
 
@@ -135,7 +137,7 @@ public class ExampleObjectTest {
 
 	interface InnerStatic {
 		boolean isBooleanState();
-		
+
 		String getState();
 
 		void setState(String state);
@@ -159,7 +161,7 @@ public class ExampleObjectTest {
 	}
 
 	interface UnlockedExampleExceptionResult {
-		
+
 		@Convert
 		InnerStaticException createInnerStatic();
 
@@ -174,7 +176,17 @@ public class ExampleObjectTest {
 
 	}
 
+	@Meta(Constructors.class)
 	interface InnerStaticWithoutStandardConstructor {
 	}
-	
+
+	interface Constructors {
+		@Convert
+		@Mixin
+		InnerStaticWithoutStandardConstructor create();
+
+		@Convert
+		InnerStaticWithoutStandardConstructor create(String s);
+	}
+
 }

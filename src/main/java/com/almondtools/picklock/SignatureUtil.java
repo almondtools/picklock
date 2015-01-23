@@ -11,16 +11,16 @@ import java.util.List;
 
 public final class SignatureUtil {
 
-	private static final String CONSTRUCTOR = "create";
-	private static final String IS = "is";
-	private static final String GET = "get";
-	private static final String SET = "set";
+	public static final String CONSTRUCTOR = "create";
+	public static final String IS = "is";
+	public static final String GET = "get";
+	public static final String SET = "set";
 
 	private SignatureUtil() {
 	}
 
-	public static boolean isStatic(Method method) {
-		return method.getAnnotation(Static.class) != null;
+	public static boolean isMixin(Method method) {
+		return method.getAnnotation(Mixin.class) != null;
 	}
 
 	public static boolean isConstructor(Method method) {

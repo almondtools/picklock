@@ -164,9 +164,16 @@ public class ConverterTest {
 		void setString(String s);
 	}
 
+	@Meta(Constructors.class)
 	interface SimpleOtherInterface {
 		String getString();
 		void setString(String s);
+	}
+	
+	interface Constructors {
+		@Mixin
+		SimpleOtherInterface create();
+		SimpleOtherInterface create(String s);
 	}
 
 	@SuppressWarnings("unused")
