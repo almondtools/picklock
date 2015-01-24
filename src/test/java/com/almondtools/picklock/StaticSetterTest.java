@@ -1,6 +1,7 @@
 package com.almondtools.picklock;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
@@ -51,6 +52,18 @@ public class StaticSetterTest {
 		assertThat(result, equalTo((Object) "hello"));
 	}
 
+	@Test
+	public void testInvokeWithArgumentConversion() throws Throwable {
+		StaticSetter staticMethod = new StaticSetter(WithConvertedProperty.class, WithConvertedProperty.class.getDeclaredField("converted"), ConvertedInterface.class);
+		staticMethod.invoke(new ConvertedInterface() {
+		});
+		assertThat(WithConvertedProperty.converted, notNullValue());
+	}
+	
+	interface Properties {
+		void setConverted(@Convert("WithConvertedProperty") ConvertedInterface i);
+	}
+	
 	private static class WithField {
 
 		private static String field;
@@ -60,5 +73,14 @@ public class StaticSetterTest {
 
 		static final String RUNTIME = "ABC".toString();
 		static final String COMPILETIME = "ABC";
+	}
+
+	private static class WithConvertedProperty {
+		
+		private static WithConvertedProperty converted = null;
+
+	}
+	
+	interface ConvertedInterface {
 	}
 }

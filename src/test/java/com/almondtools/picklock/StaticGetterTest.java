@@ -1,12 +1,12 @@
 package com.almondtools.picklock;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
 
-@SuppressWarnings("unused")
 public class StaticGetterTest {
 
 	@Test
@@ -26,9 +26,30 @@ public class StaticGetterTest {
 		assertThat((String) result, equalTo("world"));
 	}
 
+	@Test
+	public void testInvokeWithResultConversion() throws Throwable {
+		StaticGetter staticMethod = new StaticGetter(WithConvertedProperty.class, WithConvertedProperty.class.getDeclaredField("converted"), ConvertedInterface.class);
+		Object result = staticMethod.invoke();
+		assertThat(result, instanceOf(ConvertedInterface.class));
+	}
+	
+	interface Properties {
+		@Convert("WithConvertedProperty") ConvertedInterface getConverted();
+	}
+	
+	@SuppressWarnings("unused")
 	private static class WithField {
 		
 		private static String field = "world";
 	}
 
+	@SuppressWarnings("unused")
+	private static class WithConvertedProperty {
+		
+		private static WithConvertedProperty converted = new WithConvertedProperty();
+
+	}
+	
+	interface ConvertedInterface {
+	}
 }

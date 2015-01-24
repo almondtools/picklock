@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 
 import org.junit.Test;
 
@@ -32,8 +33,30 @@ public class ConstructorInvokerTest {
 	}
 	
 	@Test(expected=IOException.class)
-	public void testInvokeWithAIOBConstructor() throws Throwable {
+	public void testInvokeWithIOConstructor() throws Throwable {
 		Object result = new ConstructorInvoker(WithConstructor.class.getDeclaredConstructor(boolean.class)).invoke(new Object[]{Boolean.TRUE});
+	}
+	
+	@Test
+	public void testInvokeWithArgumentConversion() throws Throwable {
+		Method method = Constructors.class.getDeclaredMethod("create");
+		ConstructorInvoker constructor = new ConstructorInvoker(WithConvertedConstructor.class.getDeclaredConstructor(), method );
+		Object result = constructor.invoke(new Object[0]);
+		assertThat(result, instanceOf(ConvertedInterface.class));
+	}
+	
+	@Test
+	public void testInvokeWithResultConversion() throws Throwable {
+		Method method = Constructors.class.getDeclaredMethod("create", ConvertedInterface.class);
+		ConstructorInvoker constructor = new ConstructorInvoker(WithConvertedConstructor.class.getDeclaredConstructor(WithConvertedConstructor.class), method );
+		Object result = constructor.invoke(new ConvertedInterface() {
+		});
+		assertThat(result, instanceOf(WithConvertedConstructor.class));
+	}
+	
+	interface Constructors {
+		@Convert("WithConvertedConstructor") ConvertedInterface create();
+		WithConvertedConstructor create(@Convert("WithConvertedConstructor") ConvertedInterface i);
 	}
 	
 	private static class WithConstructor {
@@ -51,6 +74,19 @@ public class ConstructorInvokerTest {
 	}
 
 	private static class WithImplicitConstructor {
+	}
+
+	private static class WithConvertedConstructor {
+		
+		public WithConvertedConstructor() {
+		}
+
+		public WithConvertedConstructor(WithConvertedConstructor e) {
+		}
+
+	}
+	
+	interface ConvertedInterface {
 	}
 
 }

@@ -63,10 +63,11 @@ public class StaticSetter implements StaticMethodInvocationHandler {
 		if (args == null || args.length != 1) {
 			throw new IllegalArgumentException("setters can only be invoked with exactly one argument, was " + (args == null ? "null" : String.valueOf(args.length)) + " arguments");
 		}
-		if (args[0] != null && !BoxingUtil.getBoxed(field.getType()).isInstance(args[0])) {
-			throw new ClassCastException("defined type of " + field.getName() + " is " + args[0].getClass().getSimpleName() + ", but assigned type was " + field.getType().getSimpleName());
+		Object arg = a(args[0]);
+		if (arg != null && !BoxingUtil.getBoxed(field.getType()).isInstance(arg)) {
+			throw new ClassCastException("defined type of " + field.getName() + " is " + arg.getClass().getSimpleName() + ", but assigned type was " + field.getType().getSimpleName());
 		}
-		field.set(type, a(args[0]));
+		field.set(type, arg);
 		return null;
 	}
 

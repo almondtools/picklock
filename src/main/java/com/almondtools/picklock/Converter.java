@@ -91,6 +91,8 @@ public class Converter {
 	public static Object convertResult(Class<?> targetType, Class<?> methodType, Object result) throws NoSuchMethodException {
 		if (targetType.equals(methodType)) {
 			return result;
+		} else if (result == null) {
+			return null;
 		} else {
 			return ObjectAccess.unlock(result).features(targetType);
 		}
