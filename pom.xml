@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.almondtools</groupId>
 	<artifactId>picklock</artifactId>
-	<version>0.1.1-SNAPSHOT</version>
+	<version>0.2.0</version>
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>An application to get controlled  access to private members of Java classes</description>
 	<url>https://github.com/almondtools/picklock</url>
@@ -27,7 +26,8 @@
 		<connection>scm:git:git@github.com:almondtools/picklock.git</connection>
 		<developerConnection>scm:git:git@github.com:almondtools/picklock.git</developerConnection>
 		<url>git@github.com:almondtools/picklock.git</url>
-	</scm>
+	  <tag>picklock-0.2.0</tag>
+  </scm>
 	<distributionManagement>
 		<snapshotRepository>
 			<id>ossrh</id>
