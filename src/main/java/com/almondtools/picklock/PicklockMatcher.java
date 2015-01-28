@@ -8,16 +8,16 @@ import org.hamcrest.Description;
 import org.hamcrest.SelfDescribing;
 import org.hamcrest.TypeSafeMatcher;
 
-public class UnlockableMatcher extends TypeSafeMatcher<Class<?>> {
+public class PicklockMatcher extends TypeSafeMatcher<Class<?>> {
 
 	private Class<?> interfaceClazz;
 
-	public UnlockableMatcher(Class<?> interfaceClazz) {
+	public PicklockMatcher(Class<?> interfaceClazz) {
 		this.interfaceClazz = interfaceClazz;
 	}
 
-	public static UnlockableMatcher canBeTreatedAs(Class<?> interfaceClazz) {
-		return new UnlockableMatcher(interfaceClazz);
+	public static PicklockMatcher providesFeaturesOf(Class<?> interfaceClazz) {
+		return new PicklockMatcher(interfaceClazz);
 	}
 
 	@Override

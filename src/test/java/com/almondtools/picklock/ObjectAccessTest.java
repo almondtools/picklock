@@ -1,6 +1,6 @@
 package com.almondtools.picklock;
 
-import static com.almondtools.picklock.UnlockableMatcher.canBeTreatedAs;
+import static com.almondtools.picklock.PicklockMatcher.providesFeaturesOf;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
@@ -22,15 +22,15 @@ public class ObjectAccessTest {
 	}
 
 	@Test
-		public void testUnlockable() throws Exception {
-			assertThat(LockedObject.class, canBeTreatedAs(UnlockedObject.class));
-			assertThat(LockedObject.class, not(canBeTreatedAs(UnlockedNotMatchingMethodObject.class)));
-			assertThat(LockedObject.class, not(canBeTreatedAs(UnlockedNotMatchingGetterObject.class)));
-			assertThat(LockedObject.class, not(canBeTreatedAs(UnlockedNotMatchingSetterObject.class)));
-			assertThat(LockedObjectWithDeclaredExceptions.class, canBeTreatedAs(UnlockedWithCorrectExceptions.class));
-			assertThat(LockedObjectWithDeclaredExceptions.class, not(canBeTreatedAs(UnlockedWithMissingExceptions.class)));
-			assertThat(LockedObjectWithDeclaredExceptions.class, not(canBeTreatedAs(UnlockedWithFalseExceptions.class)));
-		}
+	public void testUnlockable() throws Exception {
+		assertThat(LockedObject.class, providesFeaturesOf(UnlockedObject.class));
+		assertThat(LockedObject.class, not(providesFeaturesOf(UnlockedNotMatchingMethodObject.class)));
+		assertThat(LockedObject.class, not(providesFeaturesOf(UnlockedNotMatchingGetterObject.class)));
+		assertThat(LockedObject.class, not(providesFeaturesOf(UnlockedNotMatchingSetterObject.class)));
+		assertThat(LockedObjectWithDeclaredExceptions.class, providesFeaturesOf(UnlockedWithCorrectExceptions.class));
+		assertThat(LockedObjectWithDeclaredExceptions.class, not(providesFeaturesOf(UnlockedWithMissingExceptions.class)));
+		assertThat(LockedObjectWithDeclaredExceptions.class, not(providesFeaturesOf(UnlockedWithFalseExceptions.class)));
+	}
 
 	@Test
 	public void testMethodInvocation() throws Exception {
@@ -102,20 +102,20 @@ public class ObjectAccessTest {
 			String msg = unlocked.myMethod(null);
 			fail("expected io exception, but found: " + msg);
 		} catch (IOException e) {
-			//expected
+			// expected
 		}
 	}
-	
-	@Test(expected=NoSuchMethodException.class)
+
+	@Test(expected = NoSuchMethodException.class)
 	public void testMissingExceptionSignature() throws Exception {
 		ObjectAccess.unlock(new LockedObjectWithDeclaredExceptions()).features(UnlockedWithMissingExceptions.class);
 	}
-	
-	@Test(expected=NoSuchMethodException.class)
+
+	@Test(expected = NoSuchMethodException.class)
 	public void testFalseExceptionSignature() throws Exception {
 		ObjectAccess.unlock(new LockedObjectWithDeclaredExceptions()).features(UnlockedWithFalseExceptions.class);
 	}
-	
+
 	public static interface UnlockedObject {
 		void setMyField(String value);
 
@@ -136,7 +136,7 @@ public class ObjectAccessTest {
 	}
 
 	public static interface UnlockedNotMatchingSetterObject {
-		
+
 		void setNotExisting(boolean b);
 	}
 
