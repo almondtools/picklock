@@ -242,16 +242,24 @@ Picklock covers only one aspect of reflection => access to private but staticall
 
 Maintaining and Tracking Picklocked Objects
 ===========================================
-Can we view Picklock as a statically typed interface to Reflection? Not really! Although we operate on pure java interfaces, these interfaces are dynamically
-mapped to the target objects. Renaming of class members could break this mapping.
+Can we view Picklock as a statically typed interface to Reflection? In Theory we would use picklock with a statically known features.
+In this case only the compiler limits us from ruling out broken reflection mappings at compile time.
 
-But contrary to reflection we could easily assert that our picklock assumptions on a certain object hold. Just write a test:
-* determine any pair of types (locked class, unlocked facade class)
-* write a test containing only "ObjectAccess.check(house.getClass()).isUnlockable(PicklockedHouse.class);"
-* if picklocking a static interface the test would look like "ClassAccess.check(TheOneAndOnly.class).isUnlockable(PicklockedStatic.class);"
-* this test would always fail, if the internals used by Picklock do not exist any more (e.g. because the member names changed)
+But it is rather easy to be safe from broken reflection mappings. Just write a test for each pair of closed classes and feature interfaces, e.g.
+for the upper example:
+  
+```Java
+import static com.almondtools.picklock.PicklockMatcher.providesFeaturesOf;
 
-Such a test is nearly as robust as static compile time checking. 
+...
+	@Test
+	public void testPreventRuntimeErrorsOnPicklocking() throws Exception {
+		assertThat(House.class, providesFeaturesOf(Picklocked.class));
+		assertThat(House.class, providesFeaturesOf(PicklockedKey.class));
+		assertThat(House.class, providesFeaturesOf(PicklockedLock.class));
+	}
+...
+```	
 
 
 Using Picklock

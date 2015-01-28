@@ -1,5 +1,7 @@
 package com.almondtools.picklock;
 
+import static com.almondtools.picklock.SignatureUtil.methodSignature;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,42 +32,19 @@ public class PicklockMatcher extends TypeSafeMatcher<Class<?>> {
 		List<Method> conflicts = ObjectAccess.check(item).isUnlockable(interfaceClazz);
 		if (!conflicts.isEmpty()) {
 			mismatchDescription
-			.appendText("cannot find following members in ")
-			.appendValue(item.getSimpleName())
-			.appendText(": ")
-			.appendList("\n", "\n", "", describe(conflicts));
+				.appendText("cannot map following members in ")
+				.appendValue(item.getSimpleName())
+				.appendText(": ")
+				.appendList("\n", "\n", "", describe(conflicts));
 		}
 	}
 
 	private List<SelfDescribing> describe(List<Method> conflicts) {
 		List<SelfDescribing> descriptions = new ArrayList<SelfDescribing>(conflicts.size());
 		for (Method conflict : conflicts) {
-			StringBuilder buffer = new StringBuilder();
-			buffer.append(conflict.getReturnType().getSimpleName());
-			buffer.append(' ');
-			buffer.append(conflict.getName());
-			buffer.append('(');
-			Class<?>[] parameterTypes = conflict.getParameterTypes();
-			if (parameterTypes.length > 0) {
-				buffer.append(parameterTypes[0].getSimpleName());
-			}
-			for (int i = 1; i < parameterTypes.length; i++) {
-				buffer.append(", ");
-				buffer.append(parameterTypes[i].getSimpleName());
-			}
-			buffer.append(')');
-			Class<?>[] exceptionTypes = conflict.getExceptionTypes();
-			if (exceptionTypes.length > 0) {
-				buffer.append(" throws ");
-				buffer.append(exceptionTypes[0].getSimpleName());
-				for (int i = 1; i < exceptionTypes.length; i++) {
-					buffer.append(", ");
-					buffer.append(exceptionTypes[i].getSimpleName());
-				}
-			}
-			descriptions.add(new Signature(buffer.toString()));
+			descriptions.add(new Signature(methodSignature(conflict.getName(), conflict.getReturnType(), conflict.getParameterTypes(), conflict.getExceptionTypes())));
 		}
-		return descriptions ;
+		return descriptions;
 	}
 
 	@Override
@@ -82,7 +61,7 @@ public class PicklockMatcher extends TypeSafeMatcher<Class<?>> {
 
 		@Override
 		public void describeTo(Description description) {
-			description.appendText(signature);					
+			description.appendText(signature);
 		}
 	}
 
