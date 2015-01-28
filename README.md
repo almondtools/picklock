@@ -267,3 +267,14 @@ Maven Dependency
 	<version>0.2.2</version>
 </dependency>
 ```
+
+Bugs and Issues
+---------------
+If you find a bug or some other inconvenience with picklock:
+- Open an Issue
+- If possible provide a code example which reproduces the problem
+- Optional: Provide a pull request which fixes (or works around) the problem
+If you miss a feature:
+- Open an Issue describing the missing feature
+If you find bad or misleading english in the documentation:
+- Tell me
