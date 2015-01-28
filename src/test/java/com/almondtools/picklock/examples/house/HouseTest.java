@@ -1,5 +1,6 @@
 package com.almondtools.picklock.examples.house;
 
+import static com.almondtools.picklock.PicklockMatcher.providesFeaturesOf;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.contains;
@@ -69,6 +70,13 @@ public class HouseTest {
 		house.open(key);
 		List<Furniture> furniture = house.listFurniture();
 		assertThat(furniture, contains(instanceOf(Safe.class)));
+	}
+	
+	@Test
+	public void testPreventRuntimeErrorsOnPicklocking() throws Exception {
+		assertThat(House.class, providesFeaturesOf(Picklocked.class));
+		assertThat(House.class, providesFeaturesOf(PicklockedKey.class));
+		assertThat(House.class, providesFeaturesOf(PicklockedLock.class));
 	}
 	
 	interface Picklocked {
