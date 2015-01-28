@@ -254,12 +254,16 @@ But contrary to reflection we could easily assert that our picklock assumptions 
 Such a test is nearly as robust as static compile time checking. 
 
 
-Now why should we use this?
-===========================
-I see some scenarios of application:
+Using Picklock
+==============
 
-1. Sometimes we have to come up with foreign code that we cannot easily change. Perhaps it was not designed for TDD or dependency injection. In this case we have to access private members, and we can do this with picklock. The alternative would be to patch the code with getters and setters, which is not very rewarding.
+Maven Dependency
+----------------
 
-2. Worse: We have to come up with legacy code (meaning code, that is not maintained any more). Legacy code has one positive property. Internals are usually not changed often (because that could break the whole system). So if the private members of a legacy code object is not reachable, we can make it reachable with picklock.
-
-3. Better: In some cases we want to publish an API, which is well designed. If the developer follows the "Law of Demeter" and "Tell don't Ask" he might have been very restrictive in using getter and setter methods. However if he is a good developer he writes tested code and testing could be a problem if the private state is completely hidden. Now picklock enables him to access the private State in unit tests but prevents other users from depending on inner state of API objects.
+```xml
+<dependency>
+	<groupId>com.github.almondtools</groupId>
+	<artifactId>picklock</artifactId>
+	<version>0.2.2</version>
+</dependency>
+```
