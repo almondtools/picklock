@@ -19,14 +19,18 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class StaticInvocationResolver {
 
+	private Map<String, Field> fieldCache;
 	private Class<?> type;
 
 	public StaticInvocationResolver(Class<?> type) {
 		this.type = type;
+		this.fieldCache = new HashMap<String, Field>();
 	}
 
 	protected StaticMethodInvocationHandler findInvocationHandler(Method method) throws NoSuchMethodException {
@@ -111,7 +115,11 @@ public class StaticInvocationResolver {
 		while (currentClass != Object.class) {
 			for (String fieldName : fieldNames) {
 				try {
-					Field field = currentClass.getDeclaredField(fieldName);
+					Field field = fieldCache.get(fieldName);
+					if (field == null) {
+						field = currentClass.getDeclaredField(fieldName);
+						fieldCache.put(fieldName, field);
+					}
 					if (field.getType() == type) {
 						return field;
 					} else if (field.getType().getSimpleName().equals(convert)) {

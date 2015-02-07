@@ -1,10 +1,10 @@
 package com.almondtools.picklock;
 
 import static com.almondtools.picklock.Converter.convertArgument;
+import static com.almondtools.picklock.FinalUtil.ensureNonFinal;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
 
 /**
  * Wraps a static field with modification (setter) access.
@@ -27,11 +27,9 @@ public class StaticSetter implements StaticMethodInvocationHandler {
 		this.type = type;
 		this.field = field;
 		field.setAccessible(true);
-		if (isFinal(field)) {
-			makeNonFinal(field);
-		}
+		ensureNonFinal(field);
 	}
-	
+
 	/**
 	 * Sets a value on the given field. Beyond {@link #StaticSetter(Class, Field)} this constructor also converts the argument
 	 * @param type the static type of the field to access
@@ -42,20 +40,7 @@ public class StaticSetter implements StaticMethodInvocationHandler {
 	public StaticSetter(Class<?> type, Field field, Class<?> target) {
 		this(type, field);
 		this.target = target;
-	}
-
-	private boolean isFinal(Field field) {
-		return (field.getModifiers() & Modifier.FINAL) == Modifier.FINAL;
-	}
-
-	private void makeNonFinal(Field field) {
-		try {
-			Field modifiersField = Field.class.getDeclaredField("modifiers");
-			modifiersField.setAccessible(true);
-			modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-		} catch (Exception e) {
-			//omit this exception
-		}
+		ensureNonFinal(field);
 	}
 
 	@Override

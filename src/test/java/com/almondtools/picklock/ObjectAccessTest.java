@@ -116,6 +116,22 @@ public class ObjectAccessTest {
 		ObjectAccess.unlock(new LockedObjectWithDeclaredExceptions()).features(UnlockedWithFalseExceptions.class);
 	}
 
+	@Test
+	public void testFinalGetSet() throws Exception {
+		UnlockedObject unlocked = ObjectAccess.unlock(object).features(UnlockedObject.class);
+		unlocked.setInteger(-2);
+		assertThat(unlocked.getInteger(), equalTo(-2));
+	}
+	
+	@Test
+	public void testFinalSetAfterGet() throws Exception {
+		UnlockedObject unlocked = ObjectAccess.unlock(object).features(UnlockedObject.class);
+		int result = unlocked.getInteger();
+		unlocked.setInteger(-2);
+		unlocked.setInteger(result);
+		assertThat(unlocked.getInteger(), equalTo(2));
+	}
+	
 	public static interface UnlockedObject {
 		void setMyField(String value);
 
@@ -128,6 +144,11 @@ public class ObjectAccessTest {
 		void setSuperField(double d);
 
 		double superMethod();
+
+		void setInteger(int i);
+
+		int getInteger();
+
 	}
 
 	public static interface UnlockedNotMatchingMethodObject {

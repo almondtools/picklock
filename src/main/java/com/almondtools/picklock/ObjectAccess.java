@@ -13,7 +13,7 @@ import java.util.Map;
  * 
  * <p>After that the variable unlocked contains an object of type InterfaceOfTheDecorator, where each method is mapped according to the picklock conventions:
  * 
- *  * <table>
+ * <table>
  * <col width="30%"/> <col width="30%"/> <col width="40%"/>
  * <thead><tr><th>Method</th><th>Maps to</th><th></th></tr><thead>
  * <tr>

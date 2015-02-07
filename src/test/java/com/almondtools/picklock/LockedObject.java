@@ -4,6 +4,8 @@ package com.almondtools.picklock;
 
 public class LockedObject extends LockedSuper {
 
+	@SuppressWarnings("unused")
+	private final int integer = new Integer(2).intValue();
 	private String myField;
 	
 	private int myMethod(String string, boolean flag) {

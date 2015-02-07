@@ -3,8 +3,8 @@ package com.almondtools.picklock;
 import static com.almondtools.picklock.Converter.determineNeededConversions;
 import static com.almondtools.picklock.Converter.isConverted;
 import static com.almondtools.picklock.SignatureUtil.computeFieldNames;
-import static com.almondtools.picklock.SignatureUtil.findTargetTypeName;
 import static com.almondtools.picklock.SignatureUtil.fieldSignature;
+import static com.almondtools.picklock.SignatureUtil.findTargetTypeName;
 import static com.almondtools.picklock.SignatureUtil.isBooleanGetter;
 import static com.almondtools.picklock.SignatureUtil.isGetter;
 import static com.almondtools.picklock.SignatureUtil.isSetter;
@@ -17,14 +17,18 @@ import static com.almondtools.picklock.SignatureUtil.propertyTypeOf;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class InvocationResolver {
 
+	private Map<String, Field> fieldCache;
 	private Class<?> innerClass;
 
 	public InvocationResolver(Class<?> clazz) {
 		this.innerClass = clazz;
+		this.fieldCache = new HashMap<String, Field>();
 	}
 
 	protected MethodInvocationHandler findInvocationHandler(Method method) throws NoSuchMethodException {
@@ -75,7 +79,11 @@ public class InvocationResolver {
 		while (currentClass != Object.class) {
 			for (String fieldName : fieldNames) {
 				try {
-					Field field = currentClass.getDeclaredField(fieldName);
+					Field field = fieldCache.get(fieldName);
+					if (field == null) {
+						field = currentClass.getDeclaredField(fieldName);
+						fieldCache.put(fieldName, field);
+					}
 					if (field.getType() == type) {
 						return field;
 					} else if (field.getType().getSimpleName().equals(convert)) {
