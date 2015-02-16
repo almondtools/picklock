@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import com.almondtools.picklock.Convert;
 import com.almondtools.picklock.ObjectAccess;
+import com.almondtools.picklock.PicklockException;
 
 public class ExampleObjectTest {
 
@@ -58,13 +59,13 @@ public class ExampleObjectTest {
 		}, ""), is(true));
 	}
 
-	@Test(expected = NoSuchMethodException.class)
+	@Test(expected = PicklockException.class)
 	public void testInnerStaticMappingExceptionOnResult() throws Exception {
 		ExampleObject exampleObject = new ExampleObject("state");
 		ObjectAccess.unlock(exampleObject).features(UnlockedExampleExceptionResult.class);
 	}
 
-	@Test(expected = NoSuchMethodException.class)
+	@Test(expected = PicklockException.class)
 	public void testInnerStaticMappingExceptionOnParams() throws Exception {
 		ExampleObject exampleObject = new ExampleObject("state");
 		ObjectAccess.unlock(exampleObject).features(UnlockedExampleExceptionParam.class);

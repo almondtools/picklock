@@ -9,13 +9,20 @@ import java.util.Map;
 /**
  * ObjectAccess is a Decorator for any object that should get a new public interface. Usage:
  * 
- * <p><code>InterfaceOfTheDecorator unlocked = ObjectAccess.unlock(object).features(InterfaceOfTheDecorator.class);</code>
+ * <p>
+ * <code>InterfaceOfTheDecorator unlocked = ObjectAccess.unlock(object).features(InterfaceOfTheDecorator.class);</code>
  * 
- * <p>After that the variable unlocked contains an object of type InterfaceOfTheDecorator, where each method is mapped according to the picklock conventions:
+ * <p>
+ * After that the variable unlocked contains an object of type InterfaceOfTheDecorator, where each method is mapped according to the picklock conventions:
  * 
  * <table>
- * <col width="30%"/> <col width="30%"/> <col width="40%"/>
- * <thead><tr><th>Method</th><th>Maps to</th><th></th></tr><thead>
+ * <col width="30%"/> <col width="30%"/> <col width="40%"/> <thead>
+ * <tr>
+ * <th>Method</th>
+ * <th>Maps to</th>
+ * <th></th>
+ * </tr>
+ * <thead>
  * <tr>
  * <td><code>void setProperty([sometype] t)</code></td>
  * <td><code>void setProperty([sometype] t)</code></td>
@@ -65,7 +72,7 @@ public class ObjectAccess extends InvocationResolver implements InvocationHandle
 		this.methods = new HashMap<Method, MethodInvocationHandler>();
 		this.object = object;
 	}
-	
+
 	public Object getObject() {
 		return object;
 	}
@@ -84,7 +91,7 @@ public class ObjectAccess extends InvocationResolver implements InvocationHandle
 	/**
 	 * wraps the given class. The result of this method is a {@link ObjectSnoop} object which enables the user to check if a wrapped object (of the given class)
 	 * could be target of a mapping from a specific interface. Note that a class (not an object) is wrapped, but the result will check the instance interface of this class
-	 * (all non-static methods without constructors) not the static interface. static interfaces could be checked with {@link com.almondtools.picklock.ClassAccess#check(Class<?>)}. 
+	 * (all non-static methods without constructors) not the static interface. static interfaces could be checked with {@link com.almondtools.picklock.ClassAccess#check(Class<?>)}.
 	 * 
 	 * @param type
 	 *            the target class to check
@@ -104,11 +111,15 @@ public class ObjectAccess extends InvocationResolver implements InvocationHandle
 	 *             if a method of the interface class could not be mapped according to the upper rules
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T features(Class<T> interfaceClass) throws NoSuchMethodException {
-		for (Method method : interfaceClass.getDeclaredMethods()) {
-			methods.put(method, findInvocationHandler(method));
+	public <T> T features(Class<T> interfaceClass) {
+		try {
+			for (Method method : interfaceClass.getDeclaredMethods()) {
+				methods.put(method, findInvocationHandler(method));
+			}
+			return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[] { interfaceClass }, this);
+		} catch (NoSuchMethodException e) {
+			throw new PicklockException(e.getMessage());
 		}
-		return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[] { interfaceClass }, this);
 	}
 
 	@Override

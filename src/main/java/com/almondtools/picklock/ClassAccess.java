@@ -16,8 +16,13 @@ import java.util.Map;
  * After that the variable unlocked contains an object of type InterfaceOfTheDecorator, where each method is mapped according to the picklock conventions:
  * 
  * <table>
- * <col width="30%"/> <col width="30%"/> <col width="40%"/>
- * <thead><tr><th>Method</th><th>Maps to</th><th></th></tr><thead>
+ * <col width="30%"/> <col width="30%"/> <col width="40%"/> <thead>
+ * <tr>
+ * <th>Method</th>
+ * <th>Maps to</th>
+ * <th></th>
+ * </tr>
+ * <thead>
  * <tr>
  * <td><code>ClassToUnlock create([signature])</code></td>
  * <td><code>ClassToUnlock([signature])</code></td>
@@ -105,11 +110,15 @@ public class ClassAccess extends StaticInvocationResolver implements InvocationH
 	 *             if a method of the interface class could not be mapped according to the upper rules
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T features(Class<T> interfaceClass) throws NoSuchMethodException {
-		for (Method method : interfaceClass.getDeclaredMethods()) {
-			methods.put(method, findInvocationHandler(method));
+	public <T> T features(Class<T> interfaceClass) {
+		try {
+			for (Method method : interfaceClass.getDeclaredMethods()) {
+				methods.put(method, findInvocationHandler(method));
+			}
+			return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[] { interfaceClass }, this);
+		} catch (NoSuchMethodException e) {
+			throw new PicklockException(e.getMessage());
 		}
-		return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[] { interfaceClass }, this);
 	}
 
 	@Override

@@ -20,8 +20,11 @@ public class StaticSetter implements StaticMethodInvocationHandler {
 
 	/**
 	 * Sets a value on the given field.
-	 * @param type the static type of the field to access
-	 * @param field the field to access
+	 * 
+	 * @param type
+	 *            the static type of the field to access
+	 * @param field
+	 *            the field to access
 	 */
 	public StaticSetter(Class<?> type, Field field) {
 		this.type = type;
@@ -32,10 +35,14 @@ public class StaticSetter implements StaticMethodInvocationHandler {
 
 	/**
 	 * Sets a value on the given field. Beyond {@link #StaticSetter(Class, Field)} this constructor also converts the argument
-	 * @param type the static type of the field to access
-	 * @param field the field to access
-	 * @param target the target signature (source arguments)
-	 * @see Convert 
+	 * 
+	 * @param type
+	 *            the static type of the field to access
+	 * @param field
+	 *            the field to access
+	 * @param target
+	 *            the target signature (source arguments)
+	 * @see Convert
 	 */
 	public StaticSetter(Class<?> type, Field field, Class<?> target) {
 		this(type, field);

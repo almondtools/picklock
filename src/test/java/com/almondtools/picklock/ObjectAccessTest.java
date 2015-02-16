@@ -57,7 +57,7 @@ public class ObjectAccessTest {
 		try {
 			UnlockedNotMatchingMethodObject unlocked = ObjectAccess.unlock(object).features(UnlockedNotMatchingMethodObject.class);
 			unlocked.notExistingMethod();
-		} catch (NoSuchMethodException e) {
+		} catch (PicklockException e) {
 			assertThat(e.toString(), containsString("notExistingMethod"));
 		}
 	}
@@ -67,7 +67,7 @@ public class ObjectAccessTest {
 		try {
 			UnlockedNotMatchingGetterObject unlocked = ObjectAccess.unlock(object).features(UnlockedNotMatchingGetterObject.class);
 			unlocked.getNotExisting();
-		} catch (NoSuchMethodException e) {
+		} catch (PicklockException e) {
 			assertThat(e.toString(), containsString("getNotExisting"));
 		}
 	}
@@ -77,7 +77,7 @@ public class ObjectAccessTest {
 		try {
 			UnlockedNotMatchingSetterObject unlocked = ObjectAccess.unlock(object).features(UnlockedNotMatchingSetterObject.class);
 			unlocked.setNotExisting(true);
-		} catch (NoSuchMethodException e) {
+		} catch (PicklockException e) {
 			assertThat(e.toString(), containsString("setNotExisting"));
 		}
 	}
@@ -106,12 +106,12 @@ public class ObjectAccessTest {
 		}
 	}
 
-	@Test(expected = NoSuchMethodException.class)
+	@Test(expected = PicklockException.class)
 	public void testMissingExceptionSignature() throws Exception {
 		ObjectAccess.unlock(new LockedObjectWithDeclaredExceptions()).features(UnlockedWithMissingExceptions.class);
 	}
 
-	@Test(expected = NoSuchMethodException.class)
+	@Test(expected = PicklockException.class)
 	public void testFalseExceptionSignature() throws Exception {
 		ObjectAccess.unlock(new LockedObjectWithDeclaredExceptions()).features(UnlockedWithFalseExceptions.class);
 	}
