@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.almondtools</groupId>
 	<artifactId>picklock</artifactId>
-	<version>0.2.5-SNAPSHOT</version>
+	<version>0.2.5</version>
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>An application to get controlled  access to private members of Java classes</description>
 	<url>https://github.com/almondtools/picklock</url>
@@ -26,7 +26,7 @@
 		<connection>scm:git:git@github.com:almondtools/picklock.git</connection>
 		<developerConnection>scm:git:git@github.com:almondtools/picklock.git</developerConnection>
 		<url>git@github.com:almondtools/picklock.git</url>
-		<tag>HEAD</tag>
+		<tag>picklock-0.2.5</tag>
 	</scm>
 	<distributionManagement>
 		<snapshotRepository>
