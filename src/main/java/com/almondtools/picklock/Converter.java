@@ -89,7 +89,7 @@ public class Converter {
 	}
 
 	public static Object convertResult(Class<?> targetType, Class<?> methodType, Object result) throws NoSuchMethodException {
-		if (targetType.equals(methodType)) {
+		if (targetType.isAssignableFrom(methodType)) {
 			return result;
 		} else if (result == null) {
 			return null;
