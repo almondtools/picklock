@@ -6,6 +6,7 @@ import static com.almondtools.picklock.SignatureUtil.computeFieldNames;
 import static com.almondtools.picklock.SignatureUtil.fieldSignature;
 import static com.almondtools.picklock.SignatureUtil.findTargetTypeName;
 import static com.almondtools.picklock.SignatureUtil.isBooleanGetter;
+import static com.almondtools.picklock.SignatureUtil.isCompliant;
 import static com.almondtools.picklock.SignatureUtil.isGetter;
 import static com.almondtools.picklock.SignatureUtil.isSetter;
 import static com.almondtools.picklock.SignatureUtil.matchesSignature;
@@ -84,12 +85,8 @@ public class InvocationResolver {
 						field = currentClass.getDeclaredField(fieldName);
 						fieldCache.put(fieldName, field);
 					}
-					if (field.getType() == type) {
+					if (isCompliant(type, field.getType(), convert)) {
 						return field;
-					} else if (field.getType().getSimpleName().equals(convert)) {
-						return field;
-					} else {
-						throw new NoSuchFieldException();
 					}
 				} catch (NoSuchFieldException e) {
 				}

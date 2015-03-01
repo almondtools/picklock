@@ -5,6 +5,7 @@ import static com.almondtools.picklock.Converter.isConverted;
 import static com.almondtools.picklock.SignatureUtil.findTargetTypeName;
 import static com.almondtools.picklock.SignatureUtil.fieldSignature;
 import static com.almondtools.picklock.SignatureUtil.isBooleanGetter;
+import static com.almondtools.picklock.SignatureUtil.isCompliant;
 import static com.almondtools.picklock.SignatureUtil.isConstructor;
 import static com.almondtools.picklock.SignatureUtil.isGetter;
 import static com.almondtools.picklock.SignatureUtil.isSetter;
@@ -31,6 +32,10 @@ public class StaticInvocationResolver {
 	public StaticInvocationResolver(Class<?> type) {
 		this.type = type;
 		this.fieldCache = new HashMap<String, Field>();
+	}
+	
+	public Class<?> getType() {
+		return type;
 	}
 
 	protected StaticMethodInvocationHandler findInvocationHandler(Method method) throws NoSuchMethodException {
@@ -120,12 +125,8 @@ public class StaticInvocationResolver {
 						field = currentClass.getDeclaredField(fieldName);
 						fieldCache.put(fieldName, field);
 					}
-					if (field.getType() == type) {
+					if (isCompliant(type, field.getType(), convert)) {
 						return field;
-					} else if (field.getType().getSimpleName().equals(convert)) {
-						return field;
-					} else {
-						throw new NoSuchFieldException();
 					}
 				} catch (NoSuchFieldException e) {
 				}

@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 
 
+
 public class StaticGetterTest {
 
 	@Test
@@ -33,6 +34,20 @@ public class StaticGetterTest {
 		assertThat(result, instanceOf(ConvertedInterface.class));
 	}
 	
+	@Test(expected = PicklockException.class)
+	public void testConvertingGetFieldContravariant() throws Throwable {
+		StaticGetter staticMethod = new StaticGetter(WithConvertedProperty.class, WithConvertedProperty.class.getDeclaredField("converted"), ContravariantInterface.class);
+		staticMethod.invoke();
+	}
+
+	@Test
+	public void testConvertingGetFieldConvertedContravariant() throws Throwable {
+		StaticGetter staticMethod = new StaticGetter(WithConvertedProperty.class, WithConvertedProperty.class.getDeclaredField("converted"), ConvertedContravariantInterface.class);
+		Object result = staticMethod.invoke();
+		assertThat(result, instanceOf(ConvertedContravariantInterface.class));
+		assertThat(((ConvertedContravariantInterface) result).getOther().toString(), equalTo("other"));
+	}
+
 	interface Properties {
 		@Convert("WithConvertedProperty") ConvertedInterface getConverted();
 	}
@@ -47,9 +62,22 @@ public class StaticGetterTest {
 	private static class WithConvertedProperty {
 		
 		private static WithConvertedProperty converted = new WithConvertedProperty();
+		private static String other = "other";
 
 	}
 	
 	interface ConvertedInterface {
 	}
+
+
+	interface ContravariantInterface {
+		
+		CharSequence getOther();
+	}
+	
+	interface ConvertedContravariantInterface {
+
+		@Convert CharSequence getOther();
+	}
 }
+

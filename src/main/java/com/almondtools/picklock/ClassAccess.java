@@ -117,7 +117,7 @@ public class ClassAccess extends StaticInvocationResolver implements InvocationH
 			}
 			return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[] { interfaceClass }, this);
 		} catch (NoSuchMethodException e) {
-			throw new PicklockException(e.getMessage());
+			throw new PicklockException("cannot resolve method/property " + e.getMessage() + " on " + getType());
 		}
 	}
 

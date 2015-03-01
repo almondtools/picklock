@@ -176,7 +176,7 @@ public final class SignatureUtil {
 			&& isCompliant(method.getExceptionTypes(), candidate.getExceptionTypes(), null);
 	}
 
-	private static boolean isCompliant(Class<?>[] requiredTypes, Class<?>[] candidateTypes, String[] annotatedNames) {
+	public static boolean isCompliant(Class<?>[] requiredTypes, Class<?>[] candidateTypes, String[] annotatedNames) {
 		if (candidateTypes.length != requiredTypes.length) {
 			return false;
 		}
@@ -193,8 +193,10 @@ public final class SignatureUtil {
 		return true;
 	}
 
-	private static boolean isCompliant(Class<?> requiredType, Class<?> candidateType, String annotatedName) {
-		return candidateType.equals(requiredType) || candidateType.getSimpleName().equals(annotatedName);
+	public static boolean isCompliant(Class<?> requiredType, Class<?> candidateType, String annotatedName) {
+		return candidateType.equals(requiredType) 
+			|| (requiredType.getSimpleName().equals(annotatedName) && requiredType.isAssignableFrom(candidateType))			
+			|| candidateType.getSimpleName().equals(annotatedName);
 	}
 
 	public static String findTargetTypeName(Annotation[] annotations, Class<?> defaultType) {

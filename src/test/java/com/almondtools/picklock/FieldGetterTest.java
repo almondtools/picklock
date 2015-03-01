@@ -33,6 +33,18 @@ public class FieldGetterTest {
 		assertThat(((ConvertingInterface) result).getContent(), equalTo("world"));
 	}
 
+	@Test(expected = PicklockException.class)
+	public void testConvertingGetFieldContravariant() throws Throwable {
+		new FieldGetter(ConvertibleWithField.class.getDeclaredField("field"), ContravariantInterface.class).invoke(new ConvertibleWithField(), new Object[0]);
+	}
+
+	@Test
+	public void testConvertingGetFieldConvertedContravariant() throws Throwable {
+		Object result = new FieldGetter(ConvertibleWithField.class.getDeclaredField("field"), ConvertedContravariantInterface.class).invoke(new ConvertibleWithField(), new Object[0]);
+		assertThat(result, instanceOf(ConvertedContravariantInterface.class));
+		assertThat(((ConvertedContravariantInterface) result).getContent().toString(), equalTo("world"));
+	}
+
 	@Test(expected = IllegalArgumentException.class)
 	public void testConvertingGetFieldWithFailingSignatureOne() throws Throwable {
 		new FieldGetter(ConvertibleWithField.class.getDeclaredField("field"), ConvertingInterface.class).invoke(new ConvertibleWithField(), new Object[] { 1 });
@@ -53,6 +65,14 @@ public class FieldGetterTest {
 
 	interface ConvertingInterface {
 		String getContent();
+	}
+
+	interface ContravariantInterface {
+		CharSequence getContent();
+	}
+
+	interface ConvertedContravariantInterface {
+		@Convert CharSequence getContent();
 	}
 
 	private static class ConvertibleWithField {
