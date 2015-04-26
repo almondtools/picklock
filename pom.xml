@@ -8,6 +8,8 @@
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>An application to get controlled  access to private members of Java classes</description>
 	<url>https://github.com/almondtools/picklock</url>
+
+
 	<licenses>
 		<license>
 			<name>GNU LESSER GENERAL PUBLIC LICENSE (LGPL)</name>
@@ -71,14 +73,6 @@
 					<encoding>UTF-8</encoding>
 					<showWarnings>true</showWarnings>
 					<showDeprecation>true</showDeprecation>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<version>2.9</version>
-				<configuration>
-					<downloadSources>true</downloadSources>
 				</configuration>
 			</plugin>
 		</plugins>
