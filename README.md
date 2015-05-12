@@ -1,9 +1,20 @@
 Picklock
 ========
-Picklock (meaning a duplicate key) is about accessing private members of java objects and classes utilizing a strongly typed interface.
-Picklock uses Java Reflection and Java Proxys to create an unlocked Facade of an Object or a Class.   
+Have you ever met a design that was to compact to test?
 
-The Objectives of Picklock follow here:
+Or did you write a class without setters on each attribute to inhibit usage of some private attributes?
+
+Or did you need to mock a singleton, knowing that it is stored in a private field?
+
+Or did you want to setup an input parameter from another framework which does not allow arbitrary modfication?
+
+
+You could have solved this with java reflection 
+
+... we present another method - **Picklock**.
+
+Picklock makes your objects transparent and does this with minimal noise. Picklock is no magic, it 
+relies on java reflection, but it hides the details of the process from the user. 
 
 Picklocking a sealed class
 ==========================
