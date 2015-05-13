@@ -283,7 +283,7 @@ Maven Dependency
 <dependency>
 	<groupId>com.github.almondtools</groupId>
 	<artifactId>picklock</artifactId>
-	<version>0.2.5</version>
+	<version>0.2.7</version>
 </dependency>
 ```
 
