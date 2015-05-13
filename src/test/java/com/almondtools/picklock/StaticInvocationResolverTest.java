@@ -2,6 +2,7 @@ package com.almondtools.picklock;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
@@ -14,6 +15,12 @@ import com.almondtools.picklock.InvocationResolverTest.ConvertibleInterface;
 
 @SuppressWarnings("unused")
 public class StaticInvocationResolverTest {
+
+	@Test
+	public void testGetType() throws Exception {
+		StaticInvocationResolver resolver = new StaticInvocationResolver(TestSubClass.class);
+		assertThat(resolver.getType(), sameInstance((Object) TestSubClass.class));
+	}
 
 	@Test
 	public void testFindField() throws Exception {

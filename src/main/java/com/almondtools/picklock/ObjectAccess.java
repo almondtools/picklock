@@ -3,8 +3,12 @@ package com.almondtools.picklock;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * ObjectAccess is a Decorator for any object that should get a new public interface. Usage:
@@ -113,8 +117,22 @@ public class ObjectAccess extends InvocationResolver implements InvocationHandle
 	@SuppressWarnings("unchecked")
 	public <T> T features(Class<T> interfaceClass) {
 		try {
-			for (Method method : interfaceClass.getDeclaredMethods()) {
-				methods.put(method, findInvocationHandler(method));
+			List<Class<?>> todo = new ArrayList<Class<?>>();
+			Set<Class<?>> done = new HashSet<Class<?>>();
+			todo.add(interfaceClass);
+			while (!todo.isEmpty()) {
+				Class<?> currentClass = todo.remove(0);
+				done.add(currentClass);
+				for (Method method : currentClass.getDeclaredMethods()) {
+					if (!methods.containsKey(method)) {
+						methods.put(method, findInvocationHandler(method));
+					}
+					for (Class<?> superInterfaceClazz : currentClass.getInterfaces()) {
+						if (!done.contains(superInterfaceClazz)) {
+							todo.add(superInterfaceClazz);
+						}
+					}
+				}
 			}
 			return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[] { interfaceClass }, this);
 		} catch (NoSuchMethodException e) {

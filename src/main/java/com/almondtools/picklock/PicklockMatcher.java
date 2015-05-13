@@ -24,7 +24,7 @@ public class PicklockMatcher extends TypeSafeMatcher<Class<?>> {
 
 	@Override
 	public void describeTo(Description description) {
-		description.appendText(" can unlock features of ").appendValue(interfaceClazz.getSimpleName());
+		description.appendText("can unlock features of ").appendValue(interfaceClazz);
 	}
 
 	@Override
@@ -33,7 +33,7 @@ public class PicklockMatcher extends TypeSafeMatcher<Class<?>> {
 		if (!conflicts.isEmpty()) {
 			mismatchDescription
 				.appendText("cannot map following members in ")
-				.appendValue(item.getSimpleName())
+				.appendValue(item)
 				.appendText(": ")
 				.appendList("\n", "\n", "", describe(conflicts));
 		}

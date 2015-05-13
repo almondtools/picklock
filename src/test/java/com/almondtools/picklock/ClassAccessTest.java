@@ -53,6 +53,11 @@ public class ClassAccessTest {
 		assertThat(unlocked.getDEFAULT(), nullValue());
 	}
 
+	@Test(expected=PicklockException.class)
+	public void testWrongSignature() throws Exception {
+		ClassAccess.unlock(LockedObjectWithPrivateConstructor.class).features(UnlockedNotMatchingObject.class);
+	}
+
 	public static interface UnlockedObject {
 
 		public LockedObjectWithPrivateConstructor create();
