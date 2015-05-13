@@ -1,7 +1,6 @@
 package com.almondtools.picklock;
 
 import static com.almondtools.picklock.IsEquivalent.equivalentTo;
-import static org.hamcrest.CoreMatchers.both;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
@@ -10,6 +9,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertThat;
 
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;
@@ -42,7 +42,7 @@ public class IsEquivalentTest {
 	@Test
 	public void testMatcherBasedSetValues() throws Exception {
 		assertThat(new EqTest("str", 42), equivalentTo(EqTestMatcher.class)
-			.withI(both(greaterThan(41)).and(lessThan(43)))
+			.withI(CoreMatchers.<Integer>both(greaterThan(41)).and(lessThan(43)))
 			.withStr(containsString("st")));;
 	}
 	
