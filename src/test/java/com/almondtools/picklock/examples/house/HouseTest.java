@@ -4,15 +4,18 @@ import static com.almondtools.picklock.PicklockMatcher.providesFeaturesOf;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
+import java.util.Collection;
 import java.util.List;
 
+import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.almondtools.picklock.IsEquivalent;
 import com.almondtools.picklock.ObjectAccess;
-
 
 public class HouseTest {
 
@@ -26,7 +29,7 @@ public class HouseTest {
 		house.add(new Safe());
 		house.lock(key);
 	}
-	
+
 	@Test
 	public void testHouseOwner() throws Exception {
 		boolean open = house.open(key);
@@ -35,7 +38,7 @@ public class HouseTest {
 		assertThat(furniture, contains(instanceOf(Safe.class)));
 	}
 
-	@Test(expected=UnsupportedOperationException.class)
+	@Test(expected = UnsupportedOperationException.class)
 	public void testBrute() throws Exception {
 		house.listFurniture();
 	}
@@ -53,7 +56,7 @@ public class HouseTest {
 		List<Furniture> furniture = house.listFurniture();
 		assertThat(furniture, contains(instanceOf(Safe.class)));
 	}
-	
+
 	@Test
 	public void testAquiringHousekey() throws Exception {
 		PicklockedKey picklockableHouse = ObjectAccess.unlock(house).features(PicklockedKey.class);
@@ -62,7 +65,7 @@ public class HouseTest {
 		List<Furniture> furniture = house.listFurniture();
 		assertThat(furniture, contains(instanceOf(Safe.class)));
 	}
-	
+
 	@Test
 	public void testChangingLock() throws Exception {
 		PicklockedLock picklockableHouse = ObjectAccess.unlock(house).features(PicklockedLock.class);
@@ -71,14 +74,22 @@ public class HouseTest {
 		List<Furniture> furniture = house.listFurniture();
 		assertThat(furniture, contains(instanceOf(Safe.class)));
 	}
-	
+
+	@Test
+	public void testMatchingHouses() throws Exception {
+		assertThat(house, IsEquivalent.equivalentTo(PicklockingMatcher.class)
+			.withHouseKey(key)
+			.withLocked(true)
+			.withFurniture(hasSize(1)));
+	}
+
 	@Test
 	public void testPreventRuntimeErrorsOnPicklocking() throws Exception {
 		assertThat(House.class, providesFeaturesOf(Picklocked.class));
 		assertThat(House.class, providesFeaturesOf(PicklockedKey.class));
 		assertThat(House.class, providesFeaturesOf(PicklockedLock.class));
 	}
-	
+
 	interface Picklocked {
 		void open();
 	}
@@ -89,5 +100,12 @@ public class HouseTest {
 
 	interface PicklockedLock {
 		void setHouseKey(Key key);
+	}
+
+	interface PicklockingMatcher extends Matcher<House> {
+
+		PicklockingMatcher withHouseKey(Key key);
+		PicklockingMatcher withLocked(boolean locked);
+		PicklockingMatcher withFurniture(Matcher<Collection<? extends Object>> furniture);
 	}
 }
