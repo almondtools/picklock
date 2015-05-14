@@ -1,20 +1,16 @@
 Picklock
 ========
-Have you ever met a design that was to compact to test?
 
-Or did you write a class without setters on each attribute to inhibit usage of some private attributes?
+Have you ever tried to test a complex Java class with private fields and no property method for them? It is good design to hide methods the ordinary user never should use, however a test is not an ordinary usage.
 
-Or did you need to mock a singleton, knowing that it is stored in a private field?
-
-Or did you want to setup an input parameter from another framework which does not allow arbitrary modfication?
-
+Have you ever tried to mock a singleton of third party framework, but the singleton was stored in a non accessable private field?
 
 You could have solved this with java reflection 
 
-... we present another method - **Picklock**.
+... or with **Picklock**.
 
 Picklock makes your objects transparent and does this with minimal noise. Picklock is no magic, it 
-relies on java reflection, but it hides the details of the process from the user. 
+relies on Java reflection, but it hides the details of the reflective access from the user. Just define the interface you miss on the class you want to access. Then bind it to the object and have full access to all interface methods.
 
 Picklocking a sealed class
 ==========================
