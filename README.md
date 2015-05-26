@@ -1,20 +1,53 @@
 Picklock
 ========
 
-Have you ever tried to test a complex Java class with private fields and no property method for them? It is good design to hide methods the ordinary user never should use, however a test is not an ordinary usage.
+Picklock enables you to access private static and non-static members (fields or methods) of classes without using the java reflection api.
 
-Have you ever tried to mock a singleton of third party framework, but the singleton was stored in a non accessable private field?
+The basic idea of Picklock is that any member we want to use is missing in the public interface of the class to access.
+So our first step towards getting, setting or invoking a member of a given object is to define the interface we want to access:
 
-You could have solved this with java reflection 
+    interface Example {
 
-... or with **Picklock**.
+      void setValue(String value);        // you expect a setter for the 'private String value'
+      String getValue();                  // you expect a getter for the 'private String value'
+      int callExample(char[] characters); // you expect a public method instead of 'private int callExample(char[])'
+      
+    }
+    
+In the next step we connect this interface with the object of interest:
 
-Picklock makes your objects transparent and does this with minimal noise. Picklock is no magic, it 
-relies on Java reflection, but it hides the details of the reflective access from the user. Just define the interface you miss on the class you want to access. Then bind it to the object and have full access to all interface methods.
+    Example example = ObjectAccess.unlock(object).features(Example.class);
+
+The we may call any interface on the retrieved object, allowing us to set, get or invoke the members we want to, e.g.
+
+    example.setValue("hello world");
+    
+    assert "hello world".equals(example.getValue());
+
+
+Picklock uses the java reflection api, but it does not bother one with:
+
+1. lookup of the class of the object to access
+    `Class<?> clazz = object.getClass();`
+2. wrapping of param types into arrays
+    `Class<?>[] paramTypes = new Class<?>[]{char[].class};`
+3. lookup of the member to access
+    `Method m = clazz.getDeclaredMethod("callExample", args);`
+4. enabling access for private methods/fields
+    `m.setAccessible(true);`
+5. wrapping arguments into arrays
+    `Object[] args = new Object[]{"chars".toCharArray()};`
+6. indirectly setting, getting, invoking members
+    `Object result = m.invoke(object, args);`
+7. converting the result type 
+    `int intResult = ((Integer) result).intValue();`
+
+Looks interesting? Then have a look at some examples ... 
 
 Picklocking a sealed class
 ==========================
 For the following examples consider following class
+
 ```Java
 public class House {
 
@@ -50,6 +83,7 @@ Executing hidden behaviour
 Not knowing the house key will not give you access to the house and its furniture. Yet we want to call the open method.
 
 The classic way to access the house would be reflection:
+
 ```Java
     public List<Furniture> open(House house) throws Exception {
 		Class<? extends House> houseClass = house.getClass(); // class lookup
@@ -61,6 +95,7 @@ The classic way to access the house would be reflection:
 ```
 
 The picklock style for example:
+
 ```Java
     public List<Furniture> open(House house) throws NoSuchMethodException {
 		PicklockedHouse picklockedHouse = ObjectAccess.unlock(house).features(PicklockedHouse.class); // unlock interface
@@ -81,6 +116,7 @@ Snooping Private State
 Assume that we do not want to call the open method, but we want to know the house key we have to pass to the open method.
 
 For example:
+
 ```Java
     public List<Furniture> open(House house) throws NoSuchMethodException {
 		PicklockedKey picklockableHouse = ObjectAccess.unlock(house).features(PicklockedKey.class);
@@ -99,6 +135,7 @@ Changing Private State
 Assume that we do not want to spy out the correct key, but we want to change the key/lock to a more convenient behaviour.
 
 For example:
+
 ```Java
     public List<Furniture> open(House house) throws NoSuchMethodException {
     	Key key = new Key();
@@ -112,7 +149,6 @@ For example:
 		void setHouseKey(Key key);
 	}
 ```
-
 
 Handling Singletons
 ===================
@@ -251,32 +287,6 @@ As you can see:
 - a builder methods parameter 
   - may be the expected value of the assigned property
   - or a value matcher that should be applied to the assigned property
-
-Picklock's Benefits
-===================
-Regarding the picklock solutions, there is
-* No need to lookup the class of the object to access
-* No need to lookup the method or properties by string names
-* No need to wrap argument types and arguments
-* No need to enable invocations of private methods
-* No need to invocate functions in a non-object-oriented way
-
-Why and when should we prefer picklock reflection over java reflection?
-=======================================================================
-
-Java reflection
-* is not performant
-* is cumbersome (several string lookups, access enabling)
-* is string based (and not robust at member renamings)
-* may cause security leaks (if the input string is unvalidated user input, e.g. a url parameter)
-* could in most applications be replaced by appropriate design patterns
- 
-Picklock covers only one aspect of reflection => access to private but statically known members. Picklock 
-* is convenient to use (2 steps: unlock interface, call method/property)
-* is not string based, one basically only needs the object to access and a type definition of the interface you want use for access 
-* uses a kind of adaptor/decorator design pattern, which is the object oriented way of exposing a new feature
-* prevents some security issues (user input cannot control reflective interface, because picklock does not depend on strings) 
-
 
 Maintaining and Tracking Picklocked Objects
 ===========================================
