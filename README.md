@@ -28,19 +28,40 @@ The we may call any interface on the retrieved object, allowing us to set, get o
 Picklock uses the java reflection api, but it does not bother one with:
 
 1. lookup of the class of the object to access
-    `Class<?> clazz = object.getClass();`
+
+    ```Java
+    Class<?> clazz = object.getClass();
+    ```
 2. wrapping of param types into arrays
-    `Class<?>[] paramTypes = new Class<?>[]{char[].class};`
+
+    ```Java
+    Class<?>[] paramTypes = new Class<?>[]{char[].class};
+    ```
 3. lookup of the member to access
-    `Method m = clazz.getDeclaredMethod("callExample", args);`
+    
+    ```Java
+    Method m = clazz.getDeclaredMethod("callExample", args);
+    ```
 4. enabling access for private methods/fields
-    `m.setAccessible(true);`
+    
+    ```Java
+    m.setAccessible(true);
+    ```
 5. wrapping arguments into arrays
-    `Object[] args = new Object[]{"chars".toCharArray()};`
+    
+    ```Java
+    Object[] args = new Object[]{"chars".toCharArray()};
+    ```
 6. indirectly setting, getting, invoking members
-    `Object result = m.invoke(object, args);`
+    
+    ```Java
+    Object result = m.invoke(object, args);
+    ```
 7. converting the result type 
-    `int intResult = ((Integer) result).intValue();`
+    
+    ```Java
+    int intResult = ((Integer) result).intValue();
+    ```
 
 Looks interesting? Then have a look at some examples ... 
 
