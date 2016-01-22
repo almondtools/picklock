@@ -1,3 +1,6 @@
+Picklock works with Java 7 (maybe even with Java 6), Picklock's younger sister (same subject, other api) [XrayInterface](http://almondtools.github.io/xrayinterface/) requires Java 8.
+
+
 Picklock
 ========
 
