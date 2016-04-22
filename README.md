@@ -21,7 +21,7 @@ In the next step we connect this interface with the object of interest:
 
     Example example = ObjectAccess.unlock(object).features(Example.class);
 
-The we may call any interface on the retrieved object, allowing us to set, get or invoke the members we want to, e.g.
+Then we may call any interface on the retrieved object, allowing us to set, get or invoke the members we want to, e.g.
 
     example.setValue("hello world");
     
